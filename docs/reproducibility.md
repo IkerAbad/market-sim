@@ -38,15 +38,25 @@ directory is ignored by git.  The exact baseline summary is committed as
 
 ```bash
 python scripts/run_ensemble.py --config configs/baseline.json --seeds 1001-1020 --jobs 8
+python scripts/run_ensemble.py --config configs/baseline.json --seeds 1001-1050 --jobs 8 --output results_ensemble_50 --report docs/robustness_50.md --csv-report docs/robustness_50.csv
 python scripts/run_inference.py --config configs/baseline.json --results results --report docs/inference.md
 python scripts/run_phase_diagram.py --config configs/baseline.json --seeds 1-3 --jobs 8
+python scripts/run_ablations.py --config configs/baseline.json --seeds 1001-1003 --jobs 8
+python scripts/run_sensitivity_full.py --config configs/baseline.json --seeds 1001-1003 --jobs 8
+python scripts/run_thresholds.py --input docs/robustness.csv --report docs/thresholds.md
 python scripts/run_extra_facts.py --results results --report docs/additional_facts.md
+python scripts/run_benchmarks.py --config configs/baseline.json --results results --report docs/benchmarks.md
+python scripts/run_benchmark.py --config configs/baseline.json --steps 10000,50000,100000
 ```
 
-The ensemble and the phase map use a process pool.  The bootstrap uses 200
-resamples of contiguous blocks of 1000 observations.  The phase map uses
-30,000 steps per seed and three seeds per cell.  These are the settings used
-for the committed reports.
+The ensemble, phase map, ablation and sensitivity runners use a process pool.
+The bootstrap uses 200 resamples of contiguous blocks of 1000 observations.
+The phase map uses 30,000 steps per seed and three seeds per cell.  The
+ablation and sensitivity runs use 101,000 steps and three seeds.  These are the
+settings used for the committed reports.
+
+`scripts/compare_real_data.py` is a separate tool for a user-supplied CSV.  It
+is not part of the committed outputs because the data are not packaged.
 
 ## Tests and build
 
@@ -75,6 +85,12 @@ installs the built wheel in a clean environment.
 | `docs/inference.csv` | `97B7205A955BE6AC2549E54EEEFF6223336814328F4A76D3B8EBEBE351EE3ED1` |
 | `docs/additional_facts.csv` | `FFF87CB35D445038BFBBC8CD75885571D5FA9CDFD82BDD1797A0397127523BD6` |
 | `docs/phase_diagram.csv` | `B8129AC6314E1B5FEA6E88F6B90521A70D374964241506D7C5F8E7ACBB6EF7E7` |
+| `docs/robustness_50.csv` | `E597B0FAE0051ADEBD2DC9BE8FE85765B124FAD443678627742E54A4C2C52702` |
+| `docs/ablations.csv` | `C9E6EC1C3F1A6BA8BC4661851B276D3F4E68477F700281468DC8B5D00E7DE533` |
+| `docs/sensitivity_full.csv` | `3F3D8AE751317CF422DDFE7139BFE87668DE8157A9ACFA03A1A760635DACE18B` |
+| `docs/thresholds.csv` | `18F8BF5F55FBBF68D5605D04AA1D6AB25DBD30FFA0E60FB6A5EDC7D831E80153` |
+| `docs/benchmarks.csv` | `4DD42A024FF55C7E24FCEFF9C8F994E6CEC622A4AE1D69C5AB1EE07FE0FA3E3B` |
+| `docs/performance.csv` | `A1B4533529576001C410697F8ED15A5C37942C493E97603F3E44A58878265591` |
 | `docs/baseline_metrics.json` | `31F33A81C8465CFC2606B8FF300A8151DF4421594CB7C936AA09A3C544020DE5` |
 
 The three baseline figures are byte-identical when regenerated in the reference

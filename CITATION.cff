@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, cite it as below."
 type: software
 title: "market-sim: an agent-based toy market for stylized facts"
-version: 0.2.0
+version: 0.3.0
 date-released: 2026-11-22
 authors:
   - family-names: Abad

@@ -1,0 +1,25 @@
+fact,column,direction,threshold,passes,total,rate
+Kurtosis,kurtosis,>,3,20,20,1
+Kurtosis,kurtosis,>,5,19,20,0.95
+Kurtosis,kurtosis,>,10,4,20,0.2
+Kurtosis,kurtosis,>,20,1,20,0.05
+"ACF(returns, 1)",acf_return_lag1,abs<,0.01,18,20,0.9
+"ACF(returns, 1)",acf_return_lag1,abs<,0.02,20,20,1
+"ACF(returns, 1)",acf_return_lag1,abs<,0.05,20,20,1
+"ACF(returns, 1)",acf_return_lag1,abs<,0.1,20,20,1
+"ACF(abs, 1)",acf_abs_return_lag1,>,0.05,20,20,1
+"ACF(abs, 1)",acf_abs_return_lag1,>,0.1,20,20,1
+"ACF(abs, 1)",acf_abs_return_lag1,>,0.15,18,20,0.9
+"ACF(abs, 1)",acf_abs_return_lag1,>,0.2,6,20,0.3
+"ACF(abs, 50)",acf_abs_return_lag50,>,0.02,20,20,1
+"ACF(abs, 50)",acf_abs_return_lag50,>,0.05,20,20,1
+"ACF(abs, 50)",acf_abs_return_lag50,>,0.1,18,20,0.9
+"ACF(abs, 50)",acf_abs_return_lag50,>,0.15,4,20,0.2
+"corr(volume, abs)",corr_volume_abs_return,>,0.2,20,20,1
+"corr(volume, abs)",corr_volume_abs_return,>,0.3,20,20,1
+"corr(volume, abs)",corr_volume_abs_return,>,0.5,20,20,1
+"corr(volume, abs)",corr_volume_abs_return,>,0.6,3,20,0.15
+Tail ratio,tail_exceedance_ratio,>,1,20,20,1
+Tail ratio,tail_exceedance_ratio,>,5,20,20,1
+Tail ratio,tail_exceedance_ratio,>,20,20,20,1
+Tail ratio,tail_exceedance_ratio,>,50,12,20,0.6

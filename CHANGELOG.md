@@ -6,6 +6,28 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-22
+
+### Added
+
+- Component ablation study in `docs/ablations.md`.
+- Full one-at-a-time sensitivity over 32 variants in
+  `docs/sensitivity_full.md`.
+- Threshold sensitivity over the per-seed metrics in `docs/thresholds.md`.
+- 50-seed extended hold-out with a Wilson interval in
+  `docs/robustness_50.md`.
+- Synthetic benchmarks against Gaussian, Student-t and GARCH(1,1) returns in
+  `docs/benchmarks.md`.
+- Wall-clock performance benchmark in `docs/performance.md`.
+- `scripts/compare_real_data.py` for user-supplied return or price series.
+- Pre-commit configuration for ruff, ruff-format and mypy.
+
+### Changed
+
+- The README and model card now state that a noise-only ablation passes all
+  six rows and that GARCH(1,1) also passes the five price facts.
+- The test suite has 191 tests and 96% branch coverage.
+
 ## [0.2.0] - 2026-11-22
 
 ### Added

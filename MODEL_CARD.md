@@ -7,7 +7,7 @@ study whether a small set of behavioural rules can generate five stylized facts
 of return series.  The model is not estimated from market data and is not a
 forecasting system.
 
-- Version: 0.2.0
+- Version: 0.3.0
 - License: MIT
 - Author: Iker Abad
 - Repository: https://github.com/IkerAbad/market-sim
@@ -65,9 +65,31 @@ The analysis is deliberately split into four layers:
 - the moving-block bootstrap in `docs/inference.md`,
 - the parameter map in `docs/phase_diagram.md`.
 
+An extended 50-seed hold-out in `docs/robustness_50.md` passes all six rows in
+50 of 50 seeds.  The 95% Wilson interval for the all-pass rate is
+[0.929, 1.000].  The one-at-a-time parameter scan is in
+`docs/sensitivity_full.md` and the threshold scan is in `docs/thresholds.md`.
+A GARCH(1,1) benchmark also passes the five price facts, so the facts are not
+unique to the agent-based model.
+
 Four additional diagnostics are in `docs/additional_facts.md`.  The model
 reproduces the long-memory DFA exponent but not the leverage effect, gain/loss
 asymmetry or volume lead-lag.
+
+## What the ablation shows
+
+`docs/ablations.md` removes one component at a time.  A noise-only version
+passes all six statistic rows.  Removing activity leaves 1.33 rows on average
+and no seed passes all six.  The three agent types are not the source of the
+statistical facts.  They shape the price level and the return autocorrelation.
+The activity process supplies the clustering and the tails.
+
+This is a limitation of the behavioural interpretation.  The model is a
+three-type market, but its stylized facts are mostly a property of the
+persistent activity state.  A GARCH(1,1) benchmark also passes the five price
+facts, so the five facts do not uniquely identify the agent-based model.  The
+model's additional content is the endogenous volume and the explicit agent
+rules.
 
 ## Limitations
 
@@ -75,6 +97,10 @@ asymmetry or volume lead-lag.
   long-run trends, bubbles or news.
 - Volatility clustering comes from a reduced-form activity state, not from
   wealth dynamics or chartist herding.
+- The three-type composition is not necessary for the statistical facts.  A
+  noise-only ablation passes all six rows.
+- A GARCH(1,1) benchmark also passes the five price facts.  The five facts do
+  not uniquely identify the agent-based model.
 - Chartists are deliberately weak.  Stronger chartists break the near-zero
   return autocorrelation.
 - Volume is gross demand, so the volume-volatility correlation is partly

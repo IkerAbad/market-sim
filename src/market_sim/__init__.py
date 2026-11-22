@@ -1,6 +1,23 @@
 """Agent-based toy market simulator for stylized facts."""
 
+from .ablations import (
+    ABLATIONS,
+    Ablation,
+    AblationResult,
+    AblationSummary,
+    run_ablation_grid,
+    summarize_ablations,
+)
 from .agents import CHARTIST, FUNDAMENTALIST, NOISE, Population
+from .benchmark import BenchmarkResult, time_simulation
+from .benchmarks import (
+    BenchmarkPoint,
+    benchmark_metrics,
+    evaluate_benchmark,
+    garch11_returns,
+    gaussian_returns,
+    student_t_returns,
+)
 from .bootstrap import (
     BootstrapResult,
     BootstrapSummary,
@@ -24,6 +41,7 @@ from .ensemble import (
     run_ensemble,
     run_seed,
     summarize_ensemble,
+    wilson_interval,
     write_ensemble_csv,
 )
 from .extra_facts import (
@@ -41,6 +59,12 @@ from .phase import (
     run_phase_grid,
     summarize_phase,
 )
+from .real_data import compare_metrics, load_returns_csv
+from .sensitivity import (
+    SENSITIVITY_VARIANTS,
+    run_sensitivity_grid,
+    summarize_sensitivity,
+)
 from .stylized import (
     all_facts_pass,
     autocorrelation,
@@ -51,13 +75,25 @@ from .stylized import (
     kurtosis,
     tail_exceedance_ratio,
 )
+from .thresholds import (
+    ThresholdRow,
+    evaluate_thresholds,
+    load_metrics_csv,
+)
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
+    "ABLATIONS",
     "CHARTIST",
     "FUNDAMENTALIST",
     "NOISE",
+    "SENSITIVITY_VARIANTS",
+    "Ablation",
+    "AblationResult",
+    "AblationSummary",
+    "BenchmarkPoint",
+    "BenchmarkResult",
     "BootstrapResult",
     "BootstrapSummary",
     "EnsembleSummary",
@@ -69,35 +105,51 @@ __all__ = [
     "SeedResult",
     "SimulationConfig",
     "SimulationResult",
+    "ThresholdRow",
     "additional_metrics",
     "all_facts_pass",
     "apply_overrides",
     "autocorrelation",
+    "benchmark_metrics",
     "block_indices",
     "bootstrap_metrics",
+    "compare_metrics",
     "compute_metrics",
     "config_from_dict",
     "config_to_dict",
     "correlation",
     "dfa_hurst",
+    "evaluate_benchmark",
     "evaluate_facts",
+    "evaluate_thresholds",
     "format_markdown_table",
     "format_summary_markdown",
     "gain_loss_asymmetry",
+    "garch11_returns",
+    "gaussian_returns",
     "kurtosis",
     "leverage_effect",
     "load_config",
+    "load_metrics_csv",
+    "load_returns_csv",
     "load_series_csv",
     "parse_seeds",
     "plot_phase_heatmap",
+    "run_ablation_grid",
     "run_ensemble",
     "run_phase_grid",
     "run_seed",
+    "run_sensitivity_grid",
     "save_series_csv",
     "simulate",
+    "student_t_returns",
+    "summarize_ablations",
     "summarize_ensemble",
     "summarize_phase",
+    "summarize_sensitivity",
     "tail_exceedance_ratio",
+    "time_simulation",
     "volume_volatility_lead_lag",
+    "wilson_interval",
     "write_ensemble_csv",
 ]

@@ -23,6 +23,7 @@ from .ensemble import (
     run_ensemble,
     summarize_ensemble,
     summary_to_dict,
+    wilson_interval,
     write_ensemble_csv,
 )
 from .market import load_series_csv, save_series_csv, simulate
@@ -286,6 +287,8 @@ def run_ensemble_command(args: argparse.Namespace) -> int:
         ),
         **summary_to_dict(summary),
     }
+    lower, upper = wilson_interval(summary.overall_pass_count, summary.n_seeds)
+    payload["all_pass_interval"] = [lower, upper]
     with (args.output / "summary.json").open("w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=2)
         handle.write("\n")
@@ -304,6 +307,7 @@ def run_ensemble_command(args: argparse.Namespace) -> int:
         f"- Seeds: {seeds[0]} to {seeds[-1]} ({len(seeds)} seeds)",
         f"- Steps per seed: {config.n_steps}, burn-in: {config.burn_in}",
         f"- Seeds passing all six statistic rows: {overall}",
+        f"- 95% Wilson interval for the all-pass rate: [{lower:.3f}, {upper:.3f}]",
         f"- Per-seed values: `{args.csv_report.as_posix()}`",
         "",
         table,

@@ -13,6 +13,7 @@ from market_sim.ensemble import (
     run_ensemble,
     summarize_ensemble,
     summary_to_dict,
+    wilson_interval,
     write_ensemble_csv,
 )
 
@@ -45,6 +46,21 @@ def test_parse_seeds_rejects_invalid_values() -> None:
         parse_seeds("3-1")
     with pytest.raises(ValueError):
         parse_seeds("-1")
+
+
+def test_wilson_interval() -> None:
+    lower, upper = wilson_interval(5, 10)
+    assert 0.0 < lower < 0.5 < upper < 1.0
+    lower, upper = wilson_interval(10, 10)
+    assert lower < 1.0
+    assert upper == 1.0
+    lower, upper = wilson_interval(0, 10)
+    assert lower == 0.0
+    assert upper > 0.0
+    with pytest.raises(ValueError):
+        wilson_interval(0, 0)
+    with pytest.raises(ValueError):
+        wilson_interval(11, 10)
 
 
 def test_run_ensemble() -> None:

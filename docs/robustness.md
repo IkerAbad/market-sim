@@ -10,6 +10,7 @@ python scripts/run_ensemble.py --config configs/baseline.json --seeds 1001-1020 
 - Seeds: 1001 to 1020 (20 seeds)
 - Steps per seed: 101000, burn-in: 1000
 - Seeds passing all six statistic rows: 20/20
+- 95% Wilson interval for the all-pass rate: [0.839, 1.000]
 - Per-seed values: `docs/robustness.csv`
 
 | Statistic | Mean | Median | SD | Min | Max | 5% | 95% | Seeds passing |

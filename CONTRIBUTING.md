@@ -22,6 +22,14 @@ pytest --cov=market_sim --cov-report=term-missing --cov-fail-under=95
 python -m build
 ```
 
+The repository also ships a `pre-commit` configuration with the same ruff and
+mypy checks:
+
+```bash
+pre-commit install
+pre-commit run --all-files
+```
+
 ## Reproducibility
 
 - Do not change the baseline seed without regenerating `results/` and the

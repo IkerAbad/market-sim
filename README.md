@@ -8,8 +8,10 @@ The model is a controlled experiment, not a forecast.  The baseline run
 reproduces all five facts under the stated criteria.  A 20-seed hold-out is
 reported in `docs/robustness.md`: all six statistic rows pass on all 20 seeds.
 Four additional diagnostics are reported separately, and the model reproduces
-only one of them.  The sensitivity analysis shows where that success comes from
-and which parameter changes break it.
+only one of them.  An ablation study shows that the six statistic rows come from
+the persistent activity process, not from the three agent types.  A noise-only
+version passes all of them.  The types shape the price level and the return
+autocorrelation.  See `docs/ablations.md`.
 
 ## Model
 
@@ -286,6 +288,10 @@ as the pass count:
 The ensemble is a seed hold-out, not a model-specification hold-out.  It does
 not test whether a different model would produce the same facts.
 
+An extended hold-out over seeds 1001 to 1050 is in `docs/robustness_50.md`.
+All 50 seeds pass the six rows.  The 95% Wilson interval for the all-pass rate
+is [0.929, 1.000].  The kurtosis median is 6.304 and the minimum is 4.564.
+
 ## Statistical uncertainty
 
 The ensemble measures variation across seeds.  `docs/inference.md` measures
@@ -374,6 +380,89 @@ The all-pass region covers `activity_sigma` from 1.0 to 1.5 and
 `max_chartist_demand` from 0.05 to 0.2 in this scan.  This is a coarse map, not
 a substitute for the 100,000-step baseline.
 
+## Ablations
+
+`docs/ablations.md` removes one structural ingredient at a time over seeds 1001
+to 1003.  The command is:
+
+```bash
+python scripts/run_ablations.py --config configs/baseline.json --seeds 1001-1003 --jobs 8
+```
+
+| Ablation | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | corr(volume, abs) | Tail ratio | Mean pass | All-pass seeds |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| baseline | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 6.00 | 3/3 |
+| no_chartists | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 6.00 | 3/3 |
+| no_fundamentalists | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 6.00 | 3/3 |
+| noise_only | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 6.00 | 3/3 |
+| no_activity | 0/3 | 3/3 | 0/3 | 0/3 | 0/3 | 1/3 | 1.33 | 0/3 |
+| fixed_memory | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 6.00 | 3/3 |
+| homogeneous_risk | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 6.00 | 3/3 |
+| homogeneous_wealth | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 6.00 | 3/3 |
+| no_bias | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 3/3 | 6.00 | 3/3 |
+| no_noise_demand | 3/3 | 0/3 | 3/3 | 3/3 | 3/3 | 3/3 | 5.00 | 0/3 |
+
+The noise-only version passes all six rows.  Removing activity leaves only
+1.33 rows on average and no seed passes all six.  Removing noise demand fails
+the return autocorrelation.  The three-type composition is therefore not the
+source of the statistical facts.  The types shape the price level and the
+return autocorrelation, and the activity process supplies the clustering and
+the tails.
+
+## Full sensitivity
+
+`docs/sensitivity_full.md` scans 32 one-at-a-time variants over seeds 1001 to
+1003.  The command is:
+
+```bash
+python scripts/run_sensitivity_full.py --config configs/baseline.json --seeds 1001-1003 --jobs 8
+```
+
+Most variants pass all six rows, including price impact from 0.025 to 0.2,
+noise demand from 0.5 to 5.0, the bias range, equal wealth and the
+fundamentalist response.  The variants with at least one failing seed are:
+
+- `activity_0.5`: ACF(abs, 1) fails in 3 of 3 seeds.
+- `activity_2.0`: ACF(returns, 1) fails in 1 of 3 seeds.
+- `chartist_0.50`: ACF(returns, 1) fails in 1 of 3 seeds.
+- `chartist_1.00`: ACF(returns, 1) fails in 3 of 3 seeds and the volume
+  correlation fails in 2 of 3.
+- `risk_very_low`: ACF(returns, 1) fails in 3 of 3 seeds.
+- `memory_very_short`: ACF(returns, 1) and ACF(abs, 50) fail in 3 of 3 seeds.
+- `memory_short`: ACF(abs, 50) fails in 1 of 3 seeds.
+
+The binding parameters are activity volatility, chartist strength, risk
+aversion and memory.  Price impact, noise scale, bias, wealth and the
+fundamentalist response are not the binding constraints in this range.
+
+## Threshold sensitivity
+
+`docs/thresholds.md` recomputes the 20-seed pass rate under stricter and looser
+thresholds.  The command is:
+
+```bash
+python scripts/run_thresholds.py --input docs/robustness.csv --report docs/thresholds.md
+```
+
+| Fact | Threshold | Seeds passing |
+| --- | ---: | ---: |
+| Kurtosis | > 3 | 20/20 |
+| Kurtosis | > 5 | 19/20 |
+| Kurtosis | > 10 | 4/20 |
+| ACF(returns, 1) | abs(value) < 0.01 | 18/20 |
+| ACF(returns, 1) | abs(value) < 0.02 | 20/20 |
+| ACF(abs, 1) | > 0.15 | 18/20 |
+| ACF(abs, 1) | > 0.20 | 6/20 |
+| ACF(abs, 50) | > 0.10 | 18/20 |
+| ACF(abs, 50) | > 0.15 | 4/20 |
+| corr(volume, abs) | > 0.50 | 20/20 |
+| corr(volume, abs) | > 0.60 | 3/20 |
+| Tail ratio | > 20 | 20/20 |
+| Tail ratio | > 50 | 12/20 |
+
+The facts survive stricter thresholds up to the margins shown.  Kurtosis and
+the long-lag autocorrelation are the first to fail under very strict thresholds.
+
 ## Additional facts
 
 The five target facts are not the whole story.  `docs/additional_facts.md`
@@ -408,6 +497,45 @@ The model reproduces the long-memory exponent and fails the other three.
 The thresholds are explicit choices, like the thresholds in the main table.  A
 failure here is a model limitation, not a simulator bug.
 
+## Synthetic benchmarks
+
+`docs/benchmarks.md` compares the model with three simple return processes.
+The command is:
+
+```bash
+python scripts/run_benchmarks.py --config configs/baseline.json --results results --report docs/benchmarks.md
+```
+
+| Series | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | Tail ratio | Facts passing |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| market-sim baseline | 5.488 | -0.004945 | 0.1443 | 0.1176 | 32.21 | 5/5 |
+| Gaussian | 3.02 | -0.007337 | 0.003022 | -0.003043 | 0.6315 | 2/5 |
+| Student-t(5) | 8.18 | 0.0008168 | -0.008656 | -0.001822 | 58.25 | 3/5 |
+| GARCH(1,1) | 4.096 | -0.0004496 | 0.1532 | 0.04533 | 22.58 | 5/5 |
+
+Gaussian returns fail the fat-tail and clustering facts.  Student-t returns
+have fat tails but no clustering.  GARCH(1,1) passes the five price facts in
+this sample.  The five facts alone therefore do not distinguish the agent-based
+model from a simple stochastic-volatility benchmark.  The model's additional
+content is the endogenous volume and the explicit agent rules.  The volume fact
+is not in this table because the benchmarks have no volume.  This is a central
+limitation of the five-fact exercise.
+
+## Bring your own data
+
+No market data are bundled.  `scripts/compare_real_data.py` compares any CSV
+with the model:
+
+```bash
+python scripts/compare_real_data.py --csv path/to/returns.csv --column return \
+    --config configs/baseline.json --results results --report docs/real_data.md
+```
+
+The column can be a return series or a `price`/`close` column, which is
+converted to log returns.  Use `--acf-lags 50` for series shorter than 200
+observations.  The comparison uses the five price facts and does not calibrate
+the model.  The data are not committed.
+
 ## Limitations
 
 - The fundamental value is constant.  The price is stationary and the model
@@ -415,6 +543,10 @@ failure here is a model limitation, not a simulator bug.
 - Volatility clustering comes from the reduced-form activity state, not from
   chartist herding or wealth dynamics.  The behavioural interpretation is
   attention, but the model does not derive attention from profits.
+- The three-type composition is not necessary for the statistical facts.  A
+  noise-only ablation passes all six rows.  The activity process is the source
+  of the facts.  The types shape the price level and the return
+  autocorrelation.
 - Chartists are deliberately weak.  The baseline value of
   `max_chartist_demand` is 0.1.  The sensitivity table shows that stronger
   chartists break fact 2.  The model does not establish that a realistic level
@@ -431,6 +563,9 @@ failure here is a model limitation, not a simulator bug.
   constraint.
 - The model does not reproduce the leverage effect, gain/loss asymmetry or
   volume lead-lag.  The measured values are in `docs/additional_facts.md`.
+- The five price facts are not unique to the model.  A GARCH(1,1) benchmark
+  also passes all five.  The model's additional content is the endogenous
+  volume and the explicit agent rules, not the uniqueness of the facts.
 - The thresholds used to classify the facts are choices.  They are explicit in
   the configuration file so that a reader can change them.
 
@@ -440,7 +575,7 @@ failure here is a model limitation, not a simulator bug.
 python -m pytest
 ```
 
-The suite has 165 tests and 97% branch coverage:
+The suite has 191 tests and 96% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
   population and the simulated series,
@@ -452,6 +587,9 @@ The suite has 165 tests and 97% branch coverage:
 - the price-impact fixed point when demand is zero and the zero-impact case,
 - CSV round-trips, malformed CSV files and configuration validation branches,
 - multi-seed ensemble, bootstrap, phase grid and additional-facts diagnostics,
+- component ablations, one-at-a-time sensitivity and threshold sensitivity,
+- synthetic benchmarks and performance timing,
+- the real-data comparison loader and table,
 - the command-line interface, including error paths and `python -m market_sim`,
 - property-based tests with Hypothesis for statistical invariants,
 - all three figure functions with the Agg backend.
@@ -470,9 +608,21 @@ test, and a full reproduction job.  The workflow file is
 - installation and smoke test of the built wheel
 - full 101,000-step baseline, all three figures and a 3-seed ensemble in CI
 - property-based tests with Hypothesis
+- pre-commit hooks for ruff, format and mypy
 
 These gates run on every push and pull request.  The local commands are in
 `CONTRIBUTING.md`.
+
+## Performance
+
+On the reference machine (Ryzen 9 5900X, 32 GB DDR4-3600, Windows 11), the
+simulation loop takes 5.538 s for 100,000 steps and 200 agents.  That is about
+18,058 steps/s or 3.61 million agent-steps/s.  `docs/performance.md` has the
+full table.  The command is:
+
+```bash
+python scripts/run_benchmark.py --config configs/baseline.json --steps 10000,50000,100000
+```
 
 ## License
 
@@ -490,8 +640,10 @@ en lugar de afirmarlos.  El modelo es un juguete controlado, no una previsión.
 La ejecución base reproduce los cinco hechos con los criterios indicados.  Una
 retención de 20 semillas, no usadas para elegir los parámetros, también los
 reproduce en 20/20.  Cuatro diagnósticos adicionales se reportan aparte, y el
-modelo solo reproduce uno de ellos.  El análisis de sensibilidad muestra de
-dónde sale ese resultado y qué parámetro lo rompe.
+modelo solo reproduce uno de ellos.  La ablación muestra que las seis filas
+vienen del proceso de actividad, no de los tres tipos.  Una versión solo de
+ruido las pasa todas.  El análisis de sensibilidad muestra de dónde sale ese
+resultado y qué parámetro lo rompe.
 
 ### Modelo
 
@@ -582,6 +734,11 @@ La ACF de los valores absolutos no baja de 0.1423 en el lag 1 ni de 0.0856 en
 el lag 50.  La correlación volumen-volatilidad no baja de 0.5093.  Es una
 retención de semillas, no de especificación del modelo.
 
+Una retención ampliada con las semillas 1001 a 1050 está en
+`docs/robustness_50.md`.  Pasan las seis filas en 50/50.  El intervalo de
+Wilson del 95% para la tasa de paso es [0.929, 1.000].  La curtosis tiene
+mediana 6.304 y mínimo 4.564.
+
 ### Incertidumbre y mapa
 
 El bootstrap de bloques de `docs/inference.md` da intervalos del 95% para la
@@ -611,6 +768,39 @@ rojo en la figura.
 - No hay un ajuste universal.  El resultado depende de los parámetros y de la
   semilla.
 
+### Ablaciones
+
+`docs/ablations.md` elimina un componente cada vez con las semillas 1001 a 1003.
+
+| Ablación | Media de filas | Semillas con todo |
+| --- | ---: | ---: |
+| baseline | 6.00 | 3/3 |
+| no_chartists | 6.00 | 3/3 |
+| no_fundamentalists | 6.00 | 3/3 |
+| noise_only | 6.00 | 3/3 |
+| no_activity | 1.33 | 0/3 |
+| no_noise_demand | 5.00 | 0/3 |
+
+La versión solo de ruido pasa las seis filas.  Sin actividad quedan 1.33 filas
+de media.  Sin demanda de ruido falla la ACF de retornos.  Los tres tipos no son
+la fuente de los hechos.  La actividad sí.
+
+### Sensibilidad completa y umbrales
+
+`docs/sensitivity_full.md` prueba 32 variantes una a una con las semillas 1001
+a 1003.  La mayoría pasa las seis filas.  Fallan `activity_0.5`,
+`activity_2.0`, `chartist_0.50`, `chartist_1.00`, `risk_very_low`,
+`memory_very_short` y `memory_short`.  Los parámetros que mandan son la
+volatilidad de actividad, la fuerza chartista, la aversión al riesgo y la
+memoria.  El impacto, el ruido, el sesgo, la riqueza y la respuesta
+fundamentalista no son restrictivos en este rango.
+
+`docs/thresholds.md` recalcula la tasa de paso con umbrales más estrictos.  La
+curtosis pasa 19/20 con >5 y 4/20 con >10.  La ACF(abs,1) pasa 18/20 con >0.15
+y 6/20 con >0.20.  La ACF(abs,50) pasa 18/20 con >0.10 y 4/20 con >0.15.  La
+correlación volumen-volatilidad pasa 20/20 con >0.50 y 3/20 con >0.60.  El
+ratio de colas pasa 20/20 con >20 y 12/20 con >50.
+
 ### Hechos adicionales
 
 `docs/additional_facts.md` mide cuatro diagnósticos fuera de la lista original.
@@ -626,11 +816,51 @@ El modelo reproduce la memoria larga y falla los otros tres.  La actividad y el
 ruido son simétricos.  El volumen es demanda bruta contemporánea, así que no
 puede adelantar la volatilidad.  Los umbrales son decisiones explícitas.
 
+### Comparación con benchmarks
+
+`docs/benchmarks.md` compara el modelo con tres procesos simples.
+
+| Serie | Curtosis | ACF(retornos, 1) | ACF(abs, 1) | ACF(abs, 50) | Ratio de colas | Hechos que pasan |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| market-sim baseline | 5.488 | -0.004945 | 0.1443 | 0.1176 | 32.21 | 5/5 |
+| Gaussian | 3.02 | -0.007337 | 0.003022 | -0.003043 | 0.6315 | 2/5 |
+| Student-t(5) | 8.18 | 0.0008168 | -0.008656 | -0.001822 | 58.25 | 3/5 |
+| GARCH(1,1) | 4.096 | -0.0004496 | 0.1532 | 0.04533 | 22.58 | 5/5 |
+
+Gaussian falla las colas y la agrupación.  Student-t tiene colas pero no
+agrupación.  GARCH(1,1) pasa los cinco hechos de precio.  Los cinco hechos no
+distinguen el modelo de un benchmark GARCH.  El valor añadido del modelo es el
+volumen endógeno y las reglas explícitas de los agentes.  La comparación omite
+el volumen porque los benchmarks no lo tienen.
+
+### Rendimiento
+
+En la máquina de referencia (Ryzen 9 5900X, 32 GB DDR4-3600, Windows 11), el
+bucle de simulación tarda 5.538 s para 100.000 pasos y 200 agentes, unas 18.058
+pasos/s o 3.61 millones de agentes-paso/s.  La tabla completa está en
+`docs/performance.md`.
+
+### Datos propios
+
+No hay datos de mercado incluidos.  `scripts/compare_real_data.py` compara
+cualquier CSV con el modelo:
+
+```bash
+python scripts/compare_real_data.py --csv ruta/returns.csv --column return --config configs/baseline.json --results results --report docs/real_data.md
+```
+
+La columna puede ser de retornos o de precios (`price` o `close`), que se
+convierten a retornos logarítmicos.  Usa `--acf-lags 50` para series de menos de
+200 observaciones.  La comparación usa los cinco hechos de precio y no calibra
+el modelo.  Los datos no se suben al repositorio.
+
 ### Limitaciones
 
 - El valor fundamental es constante, así que no hay tendencias de largo plazo.
 - La agrupación de volatilidad viene del estado de actividad, no de una
   dinámica de riqueza ni de comportamiento de rebaño entre chartistas.
+- Los tres tipos no son necesarios para los hechos.  Una versión solo de ruido
+  pasa las seis filas.  La actividad es la fuente.
 - Los chartistas son débiles por construcción.  El modelo no demuestra que un
   nivel realista de seguimiento de tendencia sea compatible con el hecho 2.
 - La correlación volumen-volatilidad es en parte mecánica.
@@ -641,6 +871,9 @@ puede adelantar la volatilidad.  Los umbrales son decisiones explícitas.
 - No hay libro de órdenes, dividendos ni noticias.
 - No reproduce el efecto apalancamiento, la asimetría ganancias/pérdidas ni el
   adelanto del volumen.  Los valores están en `docs/additional_facts.md`.
+- Los cinco hechos de precio no son exclusivos del modelo.  Un GARCH(1,1)
+  también pasa 5/5.  El valor añadido es el volumen endógeno y las reglas de
+  los agentes.
 - Los umbrales son decisiones explícitas y se pueden cambiar en el fichero de
   configuración.
 
@@ -664,7 +897,7 @@ Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
 valores absolutos.  El mapa de parámetros está en `docs/phase_diagram.png`.
 
-La suite tiene 165 tests y 97% de cobertura de ramas.  Las mismas comprobaciones
+La suite tiene 191 tests y 96% de cobertura de ramas.  Las mismas comprobaciones
 que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src` y
 `pytest --cov=market_sim --cov-fail-under=95`.
 

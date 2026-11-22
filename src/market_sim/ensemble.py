@@ -9,6 +9,7 @@ stronger statement than a single passing table.
 from __future__ import annotations
 
 import csv
+import math
 from collections.abc import Iterable, Sequence
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict, dataclass, replace
@@ -65,6 +66,19 @@ class EnsembleSummary:
     n_seeds: int
     overall_pass_count: int
     statistics: tuple[StatisticSummary, ...]
+
+
+def wilson_interval(successes: int, n: int, z: float = 1.96) -> tuple[float, float]:
+    """Wilson score interval for a binomial proportion."""
+    if n < 1:
+        raise ValueError("n must be positive")
+    if successes < 0 or successes > n:
+        raise ValueError("successes must be between 0 and n")
+    proportion = successes / n
+    denominator = 1.0 + z * z / n
+    centre = (proportion + z * z / (2.0 * n)) / denominator
+    half = z * math.sqrt(proportion * (1.0 - proportion) / n + z * z / (4.0 * n * n)) / denominator
+    return max(0.0, centre - half), min(1.0, centre + half)
 
 
 def parse_seeds(spec: str) -> list[int]:
