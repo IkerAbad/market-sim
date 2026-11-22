@@ -18,7 +18,7 @@ Run the same gates as CI before opening a pull request:
 ruff check .
 ruff format --check .
 mypy src
-pytest --cov=market_sim --cov-report=term-missing --cov-fail-under=90
+pytest --cov=market_sim --cov-report=term-missing --cov-fail-under=95
 python -m build
 ```
 

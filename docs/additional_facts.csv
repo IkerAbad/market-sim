@@ -1,0 +1,5 @@
+fact,statistic,value,criterion,passes
+Leverage effect,"corr(r[t], abs(r[t+1]))",-0.0009623085656,< -0.02,0
+Gain/loss asymmetry,std(losses) / std(gains),1.000417255,> 1.05,0
+Long memory of abs(returns),DFA Hurst exponent,0.8548080432,> 0.60,1
+Volume leads volatility,"best lag of corr(volume, abs(return))",0,> 0,0

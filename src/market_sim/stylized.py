@@ -40,9 +40,11 @@ def autocorrelation(x: np.ndarray | Iterable[float], max_lag: int) -> np.ndarray
     if max_lag >= array.size:
         raise ValueError("max_lag must be smaller than the series length")
     centred = array - array.mean()
-    denominator = float(np.dot(centred, centred))
-    if denominator == 0.0:
+    scale = float(np.max(np.abs(centred)))
+    if scale == 0.0:
         raise ValueError("autocorrelation is undefined for a constant series")
+    centred = centred / scale
+    denominator = float(np.dot(centred, centred))
     result = np.empty(max_lag + 1, dtype=float)
     result[0] = 1.0
     for lag in range(1, max_lag + 1):
@@ -54,10 +56,31 @@ def kurtosis(x: np.ndarray | Iterable[float]) -> float:
     """Raw kurtosis with population moments.  A normal variable has value 3."""
     array = _as_1d_finite(x, "x")
     centred = array - array.mean()
-    variance = float(np.mean(centred**2))
+    scale = float(np.max(np.abs(centred)))
+    if scale == 0.0:
+        raise ValueError("kurtosis is undefined for a constant series")
+    scaled = centred / scale
+    variance = float(np.mean(scaled**2))
     if variance == 0.0:
         raise ValueError("kurtosis is undefined for a constant series")
-    return float(np.mean(centred**4) / variance**2)
+    return float(np.mean(scaled**4) / variance**2)
+
+
+def correlation(x: np.ndarray | Iterable[float], y: np.ndarray | Iterable[float]) -> float:
+    """Pearson correlation with scale normalisation to avoid underflow."""
+    first = np.asarray(x, dtype=float)
+    second = np.asarray(y, dtype=float)
+    if first.ndim != 1 or second.ndim != 1 or first.size != second.size:
+        raise ValueError("x and y must be one-dimensional and equally long")
+    if first.size < 2 or not np.all(np.isfinite(first)) or not np.all(np.isfinite(second)):
+        raise ValueError("x and y must be finite")
+    first = first - first.mean()
+    second = second - second.mean()
+    first_scale = float(np.max(np.abs(first)))
+    second_scale = float(np.max(np.abs(second)))
+    if first_scale == 0.0 or second_scale == 0.0:
+        raise ValueError("correlation is undefined for a constant series")
+    return float(np.corrcoef(first / first_scale, second / second_scale)[0, 1])
 
 
 def tail_exceedance_ratio(x: np.ndarray | Iterable[float], sigma: float = 4.0) -> float:
@@ -70,10 +93,13 @@ def tail_exceedance_ratio(x: np.ndarray | Iterable[float], sigma: float = 4.0) -
     if sigma <= 0:
         raise ValueError("sigma must be positive")
     array = _as_1d_finite(x, "x")
-    standard_deviation = float(array.std())
-    if standard_deviation == 0.0:
+    centred = array - array.mean()
+    scale = float(np.max(np.abs(centred)))
+    if scale == 0.0:
         raise ValueError("tail ratio is undefined for a constant series")
-    empirical = float(np.mean(np.abs(array - array.mean()) > sigma * standard_deviation))
+    scaled = centred / scale
+    standard_deviation = float(scaled.std())
+    empirical = float(np.mean(np.abs(scaled) > sigma * standard_deviation))
     normal = math.erfc(sigma / math.sqrt(2.0))
     return empirical / normal
 
@@ -92,8 +118,6 @@ def compute_metrics(
         raise ValueError("volume contains non-finite values")
     if r.size <= params.acf_lags:
         raise ValueError("the series must be longer than acf_lags")
-    if float(v.std()) == 0.0:
-        raise ValueError("volume is constant")
 
     centred = r - r.mean()
     absolute = np.abs(centred)
@@ -117,7 +141,7 @@ def compute_metrics(
         "acf_abs_return_lag50": lag_value(acf_absolute, 50),
         "acf_abs_return_lag100": lag_value(acf_absolute, 100),
         "acf_abs_return_lag200": lag_value(acf_absolute, 200),
-        "corr_volume_abs_return": float(np.corrcoef(v, absolute)[0, 1]),
+        "corr_volume_abs_return": correlation(v, absolute),
         "tail_sigma": float(params.tail_sigma),
         "tail_probability": empirical_tail,
         "normal_tail_probability": float(normal_tail),

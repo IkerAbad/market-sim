@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "market-sim"
-version = "0.1.0"
+version = "0.2.0"
 description = "Agent-based toy market simulator for stylized facts of financial returns"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -35,6 +35,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "build>=1.2",
+    "hypothesis>=6",
     "mypy>=1.15",
     "pytest>=8",
     "pytest-cov>=6",
@@ -45,6 +46,9 @@ dev = [
 Homepage = "https://github.com/IkerAbad/market-sim"
 Repository = "https://github.com/IkerAbad/market-sim"
 Issues = "https://github.com/IkerAbad/market-sim/issues"
+
+[project.scripts]
+market-sim = "market_sim.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -79,7 +83,7 @@ branch = true
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 90
+fail_under = 95
 
 [tool.coverage.html]
 directory = "htmlcov"

@@ -7,8 +7,9 @@ explicit statistics instead of asserting them in prose.
 The model is a controlled experiment, not a forecast.  The baseline run
 reproduces all five facts under the stated criteria.  A 20-seed hold-out is
 reported in `docs/robustness.md`: all six statistic rows pass on all 20 seeds.
-The sensitivity analysis shows where that success comes from and which parameter
-changes break it.
+Four additional diagnostics are reported separately, and the model reproduces
+only one of them.  The sensitivity analysis shows where that success comes from
+and which parameter changes break it.
 
 ## Model
 
@@ -148,6 +149,22 @@ python -m pytest
 `make_figures.py` reads `results/series.csv` when it exists and otherwise runs
 the simulation in memory.
 
+The same workflow is available through the package CLI:
+
+```bash
+market-sim simulate --config configs/baseline.json --output results
+market-sim figures --results results --output docs
+market-sim ensemble --config configs/baseline.json --seeds 1001-1020 --jobs 8
+market-sim version
+```
+
+`python -m market_sim` accepts the same subcommands.  The inference, parameter
+map and additional-facts reports are generated with `scripts/run_inference.py`,
+`scripts/run_phase_diagram.py` and `scripts/run_extra_facts.py`.
+
+Model card: `MODEL_CARD.md`.  Environment and output hashes:
+`docs/reproducibility.md`.
+
 The same seed produces the same arrays:
 
 ```python
@@ -269,6 +286,37 @@ as the pass count:
 The ensemble is a seed hold-out, not a model-specification hold-out.  It does
 not test whether a different model would produce the same facts.
 
+## Statistical uncertainty
+
+The ensemble measures variation across seeds.  `docs/inference.md` measures
+within-series uncertainty with a moving-block bootstrap on the baseline path.
+The command is:
+
+```bash
+python scripts/run_inference.py --config configs/baseline.json --results results --report docs/inference.md
+```
+
+| Statistic | Point estimate | Bootstrap mean | 95% interval |
+| --- | ---: | ---: | ---: |
+| Kurtosis | 5.488 | 5.521 | [4.235, 7.693] |
+| ACF(returns, lag 1) | -0.004945 | -0.00504 | [-0.0125, 0.003521] |
+| ACF(abs(returns), lag 1) | 0.1443 | 0.1442 | [0.1145, 0.1814] |
+| ACF(abs(returns), lag 50) | 0.1176 | 0.1125 | [0.08772, 0.1444] |
+| corr(volume, abs(returns)) | 0.5016 | 0.5021 | [0.4741, 0.5382] |
+| Tail ratio | 32.21 | 32.31 | [23.52, 44.54] |
+
+The bootstrap uses 200 resamples of contiguous blocks of 1000 observations.
+The block length is well above the largest lag in the table (50).  Shorter
+blocks attenuate the autocorrelation at long lags.
+
+The return ACF1 interval contains zero.  The absolute-return ACF interval stays
+above 0.087 at lag 50, the volume correlation stays above 0.47 and the tail
+ratio stays above 23.  Kurtosis is the widest interval, from 4.235 to 7.693,
+but it stays above 3.
+
+These intervals are conditional on the model and the baseline parameters.
+They are not confidence intervals for real-market facts.
+
 ## Sensitivity
 
 The baseline parameters were chosen by hand after inspecting these statistics.
@@ -300,6 +348,66 @@ ACF(abs,50) from 0.1176 to 0.0809 when the seed changes from 20261122 to 7.
 All six statistic rows still pass.  The 20-seed ensemble above shows the full
 sampling distribution.
 
+## Parameter map
+
+`docs/phase_diagram.md` scans a 5 by 5 grid of `activity_sigma` and
+`max_chartist_demand` with three seeds per cell and 30,000 steps per seed.  The
+command is:
+
+```bash
+python scripts/run_phase_diagram.py --config configs/baseline.json --seeds 1-3 --jobs 8
+```
+
+![Parameter map](docs/phase_diagram.png)
+
+The baseline cell, `activity_sigma = 1.0` and `max_chartist_demand = 0.1`, is
+outlined in red and passes all six rows in 3 of 3 seeds.  The map has two clear
+failure directions:
+
+- With `activity_sigma = 0.5`, the mean is 4.33 passing rows and no seed passes
+  all six.  Low activity removes the volatility clustering required by fact 3.
+- With `max_chartist_demand = 1.0`, the mean is between 3.33 and 5.00 passing
+  rows and no seed passes all six.  Strong trend following creates return
+  autocorrelation and breaks fact 2.
+
+The all-pass region covers `activity_sigma` from 1.0 to 1.5 and
+`max_chartist_demand` from 0.05 to 0.2 in this scan.  This is a coarse map, not
+a substitute for the 100,000-step baseline.
+
+## Additional facts
+
+The five target facts are not the whole story.  `docs/additional_facts.md`
+measures four standard diagnostics that are outside the original list.  The
+command is:
+
+```bash
+python scripts/run_extra_facts.py --results results --report docs/additional_facts.md
+```
+
+| Additional fact | Statistic | Value | Criterion | Pass |
+| --- | --- | ---: | --- | :---: |
+| Leverage effect | corr(r[t], abs(r[t+1])) | -0.0009623 | < -0.02 | no |
+| Gain/loss asymmetry | std(losses) / std(gains) | 1 | > 1.05 | no |
+| Long memory of abs(returns) | DFA Hurst exponent | 0.8548 | > 0.60 | yes |
+| Volume leads volatility | best lag of corr(volume, abs(return)) | 0 | > 0 | no |
+
+The model reproduces the long-memory exponent and fails the other three.
+
+- The leverage effect is essentially zero.  The activity and noise processes
+  are symmetric, so future volatility does not react asymmetrically to the
+  sign of a past return.
+- The gain/loss volatility ratio is 1.0000.  The same symmetry removes the
+  usual asymmetry between negative and positive returns.
+- Volume is gross demand at the same step as the return.  It is correlated with
+  current volatility, as fact 4 shows, but it cannot lead future volatility.
+  The best lag is 0.
+- The DFA exponent is 0.8548.  The mixture of activity processes produces
+  persistent absolute returns, consistent with the slow autocorrelation in
+  fact 3.
+
+The thresholds are explicit choices, like the thresholds in the main table.  A
+failure here is a model limitation, not a simulator bug.
+
 ## Limitations
 
 - The fundamental value is constant.  The price is stationary and the model
@@ -319,8 +427,10 @@ sampling distribution.
   kurtosis has median 7.112 and maximum 406.5.  The baseline 5.488 is a low
   draw.  The fact "kurtosis > 3" holds in 20/20 seeds, but the magnitude is not
   stable.
-- There is no order book, no wealth update, no dividends, no short-selling
-  constraint, no leverage effect and no gain-loss asymmetry.
+- There is no order book, no wealth update, no dividends and no short-selling
+  constraint.
+- The model does not reproduce the leverage effect, gain/loss asymmetry or
+  volume lead-lag.  The measured values are in `docs/additional_facts.md`.
 - The thresholds used to classify the facts are choices.  They are explicit in
   the configuration file so that a reader can change them.
 
@@ -330,31 +440,36 @@ sampling distribution.
 python -m pytest
 ```
 
-The suite has 109 tests and 97% branch coverage:
+The suite has 165 tests and 97% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
   population and the simulated series,
 - kurtosis and autocorrelation on hand-built series with known values,
-- tail and volume statistics, including constant-series and non-finite errors,
+- tail, correlation and volume statistics, including constant-series,
+  non-finite and tiny-scale errors,
 - the simulator with extreme parameters, checking that every output stays
   finite,
 - the price-impact fixed point when demand is zero and the zero-impact case,
 - CSV round-trips, malformed CSV files and configuration validation branches,
-- multi-seed ensemble, summary and CSV export,
+- multi-seed ensemble, bootstrap, phase grid and additional-facts diagnostics,
+- the command-line interface, including error paths and `python -m market_sim`,
+- property-based tests with Hypothesis for statistical invariants,
 - all three figure functions with the Agg backend.
 
 The CI workflow runs the quality job, the test matrix on Ubuntu and Windows
-with Python 3.12, 3.13 and 3.14, and a wheel build with an installed-wheel
-smoke test.  The workflow file is `.github/workflows/ci.yml`.
+with Python 3.12, 3.13 and 3.14, a wheel build with an installed-wheel smoke
+test, and a full reproduction job.  The workflow file is
+`.github/workflows/ci.yml`.
 
 ## Quality gates
 
 - `ruff check .` and `ruff format --check .`
 - `mypy src` in strict mode
-- `pytest --cov=market_sim --cov-fail-under=90`
+- `pytest --cov=market_sim --cov-fail-under=95`
 - `python -m build` and `twine check dist/*`
 - installation and smoke test of the built wheel
 - full 101,000-step baseline, all three figures and a 3-seed ensemble in CI
+- property-based tests with Hypothesis
 
 These gates run on every push and pull request.  The local commands are in
 `CONTRIBUTING.md`.
@@ -374,8 +489,9 @@ Simulador de mercado basado en agentes, escrito para medir hechos estilizados
 en lugar de afirmarlos.  El modelo es un juguete controlado, no una previsión.
 La ejecución base reproduce los cinco hechos con los criterios indicados.  Una
 retención de 20 semillas, no usadas para elegir los parámetros, también los
-reproduce en 20/20.  El análisis de sensibilidad muestra de dónde sale ese
-resultado y qué parámetro lo rompe.
+reproduce en 20/20.  Cuatro diagnósticos adicionales se reportan aparte, y el
+modelo solo reproduce uno de ellos.  El análisis de sensibilidad muestra de
+dónde sale ese resultado y qué parámetro lo rompe.
 
 ### Modelo
 
@@ -466,6 +582,20 @@ La ACF de los valores absolutos no baja de 0.1423 en el lag 1 ni de 0.0856 en
 el lag 50.  La correlación volumen-volatilidad no baja de 0.5093.  Es una
 retención de semillas, no de especificación del modelo.
 
+### Incertidumbre y mapa
+
+El bootstrap de bloques de `docs/inference.md` da intervalos del 95% para la
+ejecución base.  La ACF de los valores absolutos en el lag 50 queda en
+[0.08772, 0.1444], la correlación volumen-volatilidad en [0.4741, 0.5382] y la
+curtosis en [4.235, 7.693].  La ACF de los retornos contiene cero.
+
+El mapa de `docs/phase_diagram.md` cruza `activity_sigma` y
+`max_chartist_demand` con tres semillas por celda y 30.000 pasos.  Las seis
+filas pasan con `activity_sigma` entre 1.0 y 1.5 y `max_chartist_demand` entre
+0.05 y 0.2.  Con `activity_sigma = 0.5` falla el hecho 3.  Con
+`max_chartist_demand = 1.0` falla el hecho 2.  La celda base está marcada en
+rojo en la figura.
+
 ### Qué rompe el resultado
 
 - Si se sube `max_chartist_demand` de 0.1 a 0.5, la ACF de los retornos sube a
@@ -481,6 +611,21 @@ retención de semillas, no de especificación del modelo.
 - No hay un ajuste universal.  El resultado depende de los parámetros y de la
   semilla.
 
+### Hechos adicionales
+
+`docs/additional_facts.md` mide cuatro diagnósticos fuera de la lista original.
+
+| Hecho adicional | Estadístico | Valor | Criterio | Cumple |
+| --- | --- | ---: | --- | :---: |
+| Efecto apalancamiento | corr(r[t], abs(r[t+1])) | -0.0009623 | < -0.02 | no |
+| Asimetría ganancias/pérdidas | std(pérdidas) / std(ganancias) | 1 | > 1.05 | no |
+| Memoria larga de abs(retornos) | Exponente de Hurst DFA | 0.8548 | > 0.60 | sí |
+| El volumen adelanta la volatilidad | mejor lag de corr(volumen, abs(retorno)) | 0 | > 0 | no |
+
+El modelo reproduce la memoria larga y falla los otros tres.  La actividad y el
+ruido son simétricos.  El volumen es demanda bruta contemporánea, así que no
+puede adelantar la volatilidad.  Los umbrales son decisiones explícitas.
+
 ### Limitaciones
 
 - El valor fundamental es constante, así que no hay tendencias de largo plazo.
@@ -493,8 +638,9 @@ retención de semillas, no de especificación del modelo.
 - La curtosis es muy inestable entre semillas.  En la retención de 20 semillas
   tiene mediana 7.112 y máximo 406.5.  El valor base 5.488 es bajo.  El hecho 1
   se cumple en 20/20, pero la magnitud no es estable.
-- No hay libro de órdenes, dividendos, noticias, efecto apalancamiento ni
-  asimetría entre ganancias y pérdidas.
+- No hay libro de órdenes, dividendos ni noticias.
+- No reproduce el efecto apalancamiento, la asimetría ganancias/pérdidas ni el
+  adelanto del volumen.  Los valores están en `docs/additional_facts.md`.
 - Los umbrales son decisiones explícitas y se pueden cambiar en el fichero de
   configuración.
 
@@ -505,16 +651,22 @@ python -m pip install -e ".[dev]"
 python scripts/run_simulation.py --config configs/baseline.json --output results
 python scripts/make_figures.py --results results --output docs
 python scripts/run_ensemble.py --config configs/baseline.json --seeds 1001-1020 --jobs 8
+python scripts/run_inference.py --config configs/baseline.json --results results --report docs/inference.md
+python scripts/run_phase_diagram.py --config configs/baseline.json --seeds 1-3 --jobs 8
+python scripts/run_extra_facts.py --results results --report docs/additional_facts.md
 python -m pytest
 ```
 
+El mismo flujo base está en `market-sim simulate`, `market-sim figures` y
+`market-sim ensemble`.
+
 Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
-valores absolutos.
+valores absolutos.  El mapa de parámetros está en `docs/phase_diagram.png`.
 
-La suite tiene 109 tests y 97% de cobertura de ramas.  Las mismas comprobaciones
+La suite tiene 165 tests y 97% de cobertura de ramas.  Las mismas comprobaciones
 que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src` y
-`pytest --cov=market_sim --cov-fail-under=90`.
+`pytest --cov=market_sim --cov-fail-under=95`.
 
 ### Licencia
 
@@ -523,4 +675,5 @@ MIT.  Copyright (c) 2026 Iker Abad.
 Autor: Iker Abad (GitHub: IkerAbad).
 
 Los metadatos de cita están en `CITATION.cff`.  Las notas de versión están en
-`CHANGELOG.md`.
+`CHANGELOG.md`.  La tarjeta del modelo está en `MODEL_CARD.md`.  El manifiesto
+de reproducibilidad está en `docs/reproducibility.md`.

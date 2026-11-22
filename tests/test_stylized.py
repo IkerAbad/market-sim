@@ -8,6 +8,7 @@ from market_sim.stylized import (
     all_facts_pass,
     autocorrelation,
     compute_metrics,
+    correlation,
     evaluate_facts,
     format_markdown_table,
     kurtosis,
@@ -78,6 +79,35 @@ def test_kurtosis_of_normal_sample() -> None:
 def test_kurtosis_rejects_constant_series() -> None:
     with pytest.raises(ValueError):
         kurtosis(np.ones(10))
+
+
+def test_kurtosis_handles_tiny_scale() -> None:
+    values = np.zeros(100)
+    values[-1] = 3.8e-128
+    assert np.isfinite(kurtosis(values))
+
+
+def test_autocorrelation_handles_tiny_scale() -> None:
+    values = np.zeros(100)
+    values[-1] = 1e-200
+    result = autocorrelation(values, max_lag=2)
+    assert np.all(np.isfinite(result))
+
+
+def test_tail_ratio_handles_tiny_scale() -> None:
+    values = np.zeros(100)
+    values[-1] = 1e-200
+    assert np.isfinite(tail_exceedance_ratio(values))
+
+
+def test_correlation_hand_built() -> None:
+    assert correlation([1.0, 2.0, 3.0], [2.0, 4.0, 6.0]) == pytest.approx(1.0)
+    assert correlation([1.0, 2.0, 3.0], [3.0, 2.0, 1.0]) == pytest.approx(-1.0)
+    assert correlation(np.arange(100.0) * 1e-200, np.arange(100.0) * 1e-200) == pytest.approx(1.0)
+    with pytest.raises(ValueError):
+        correlation([1.0, 1.0, 1.0], [1.0, 2.0, 3.0])
+    with pytest.raises(ValueError):
+        correlation([1.0, 2.0], [1.0])
 
 
 def test_tail_ratio_of_normal_sample() -> None:

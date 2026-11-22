@@ -1,0 +1,78 @@
+{
+  "seed": 20261122,
+  "n_steps": 101000,
+  "burn_in": 1000,
+  "n_observations": 100000,
+  "metrics": {
+    "n_observations": 100000,
+    "mean_return": -1.8676894152151762e-07,
+    "std_return": 0.002938165590906766,
+    "kurtosis": 5.487789254740596,
+    "acf_return_lag1": -0.004944970130020176,
+    "acf_abs_return_lag1": 0.14434830851899738,
+    "acf_abs_return_lag10": 0.1476328609688518,
+    "acf_abs_return_lag50": 0.11760794454343244,
+    "acf_abs_return_lag100": 0.0954618257393376,
+    "acf_abs_return_lag200": 0.05813990662684542,
+    "corr_volume_abs_return": 0.5016431103014376,
+    "tail_sigma": 4.0,
+    "tail_probability": 0.00204,
+    "normal_tail_probability": 6.334248366623993e-05,
+    "tail_exceedance_ratio": 32.20587324534091
+  },
+  "thresholds": {
+    "acf_lags": 200,
+    "tail_sigma": 4.0,
+    "kurtosis_threshold": 3.0,
+    "return_acf_threshold": 0.05,
+    "abs_acf_lag1_threshold": 0.05,
+    "abs_acf_lag50_threshold": 0.02,
+    "volume_corr_threshold": 0.2,
+    "tail_ratio_threshold": 1.0
+  },
+  "facts": [
+    {
+      "fact": 1,
+      "statistic": "Kurtosis",
+      "value": 5.487789254740596,
+      "criterion": "> 3",
+      "passes": true
+    },
+    {
+      "fact": 2,
+      "statistic": "ACF(returns, lag 1)",
+      "value": -0.004944970130020176,
+      "criterion": "abs(value) < 0.05",
+      "passes": true
+    },
+    {
+      "fact": 3,
+      "statistic": "ACF(abs(returns), lag 1)",
+      "value": 0.14434830851899738,
+      "criterion": "> 0.05",
+      "passes": true
+    },
+    {
+      "fact": 3,
+      "statistic": "ACF(abs(returns), lag 50)",
+      "value": 0.11760794454343244,
+      "criterion": "> 0.02",
+      "passes": true
+    },
+    {
+      "fact": 4,
+      "statistic": "corr(volume, abs(returns))",
+      "value": 0.5016431103014376,
+      "criterion": "> 0.2",
+      "passes": true
+    },
+    {
+      "fact": 5,
+      "statistic": "P(abs(r) > 4 sd) / P_normal",
+      "value": 32.20587324534091,
+      "criterion": "> 1",
+      "passes": true
+    }
+  ],
+  "all_facts_pass": true
+}
