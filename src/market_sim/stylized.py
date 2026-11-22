@@ -9,7 +9,8 @@ kurtosis is the raw fourth standardised moment, so the normal benchmark is
 from __future__ import annotations
 
 import math
-from typing import Any, Iterable
+from collections.abc import Iterable, Mapping
+from typing import Any
 
 import numpy as np
 
@@ -59,9 +60,7 @@ def kurtosis(x: np.ndarray | Iterable[float]) -> float:
     return float(np.mean(centred**4) / variance**2)
 
 
-def tail_exceedance_ratio(
-    x: np.ndarray | Iterable[float], sigma: float = 4.0
-) -> float:
+def tail_exceedance_ratio(x: np.ndarray | Iterable[float], sigma: float = 4.0) -> float:
     """Empirical two-sided tail probability divided by the normal one.
 
     A value above 1 means that observations beyond ``sigma`` standard
@@ -104,9 +103,7 @@ def compute_metrics(
     def lag_value(values: np.ndarray, lag: int) -> float | None:
         return float(values[lag]) if lag < values.size else None
 
-    empirical_tail = float(
-        np.mean(np.abs(centred) > params.tail_sigma * float(r.std()))
-    )
+    empirical_tail = float(np.mean(np.abs(centred) > params.tail_sigma * float(r.std())))
     normal_tail = math.erfc(params.tail_sigma / math.sqrt(2.0))
 
     return {
@@ -128,11 +125,24 @@ def compute_metrics(
     }
 
 
+def _metric_float(metrics: Mapping[str, float | int | None], key: str) -> float:
+    value = metrics.get(key)
+    if value is None:
+        raise ValueError(f"metric {key!r} is required")
+    return float(value)
+
+
 def evaluate_facts(
-    metrics: dict[str, float | int | None], params: MetricsParams
+    metrics: Mapping[str, float | int | None], params: MetricsParams
 ) -> list[dict[str, Any]]:
     """Map statistics to the five stylized facts and their criteria."""
     rows: list[dict[str, Any]] = []
+    kurtosis_value = _metric_float(metrics, "kurtosis")
+    return_acf1 = _metric_float(metrics, "acf_return_lag1")
+    abs_acf1 = _metric_float(metrics, "acf_abs_return_lag1")
+    abs_acf50 = _metric_float(metrics, "acf_abs_return_lag50")
+    volume_corr = _metric_float(metrics, "corr_volume_abs_return")
+    tail_ratio = _metric_float(metrics, "tail_exceedance_ratio")
 
     def add(
         fact: int,
@@ -154,44 +164,44 @@ def evaluate_facts(
     add(
         1,
         "Kurtosis",
-        float(metrics["kurtosis"]),
+        kurtosis_value,
         f"> {params.kurtosis_threshold:g}",
-        float(metrics["kurtosis"]) > params.kurtosis_threshold,
+        kurtosis_value > params.kurtosis_threshold,
     )
     add(
         2,
         "ACF(returns, lag 1)",
-        float(metrics["acf_return_lag1"]),
+        return_acf1,
         f"abs(value) < {params.return_acf_threshold:g}",
-        abs(float(metrics["acf_return_lag1"])) < params.return_acf_threshold,
+        abs(return_acf1) < params.return_acf_threshold,
     )
     add(
         3,
         "ACF(abs(returns), lag 1)",
-        float(metrics["acf_abs_return_lag1"]),
+        abs_acf1,
         f"> {params.abs_acf_lag1_threshold:g}",
-        float(metrics["acf_abs_return_lag1"]) > params.abs_acf_lag1_threshold,
+        abs_acf1 > params.abs_acf_lag1_threshold,
     )
     add(
         3,
         "ACF(abs(returns), lag 50)",
-        float(metrics["acf_abs_return_lag50"]),
+        abs_acf50,
         f"> {params.abs_acf_lag50_threshold:g}",
-        float(metrics["acf_abs_return_lag50"]) > params.abs_acf_lag50_threshold,
+        abs_acf50 > params.abs_acf_lag50_threshold,
     )
     add(
         4,
         "corr(volume, abs(returns))",
-        float(metrics["corr_volume_abs_return"]),
+        volume_corr,
         f"> {params.volume_corr_threshold:g}",
-        float(metrics["corr_volume_abs_return"]) > params.volume_corr_threshold,
+        volume_corr > params.volume_corr_threshold,
     )
     add(
         5,
         f"P(abs(r) > {params.tail_sigma:g} sd) / P_normal",
-        float(metrics["tail_exceedance_ratio"]),
+        tail_ratio,
         f"> {params.tail_ratio_threshold:g}",
-        float(metrics["tail_exceedance_ratio"]) > params.tail_ratio_threshold,
+        tail_ratio > params.tail_ratio_threshold,
     )
     return rows
 
@@ -206,12 +216,13 @@ def format_markdown_table(rows: list[dict[str, Any]]) -> str:
         value = f"{float(row['value']):.4g}"
         passes = "yes" if row["passes"] else "no"
         lines.append(
-            f"| {row['fact']} | {row['statistic']} | {value} | "
-            f"{row['criterion']} | {passes} |"
+            f"| {row['fact']} | {row['statistic']} | {value} | {row['criterion']} | {passes} |"
         )
     return "\n".join(lines)
 
 
 def all_facts_pass(rows: list[dict[str, Any]]) -> bool:
     """True when every row in the table passes its criterion."""
+    if not rows:
+        raise ValueError("at least one fact row is required")
     return all(bool(row["passes"]) for row in rows)

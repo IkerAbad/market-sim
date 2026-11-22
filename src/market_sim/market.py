@@ -65,9 +65,7 @@ def simulate(config: SimulationConfig) -> SimulationResult:
         volume[t] = float(np.abs(demand).mean())
 
     if not (
-        np.all(np.isfinite(prices))
-        and np.all(np.isfinite(returns))
-        and np.all(np.isfinite(volume))
+        np.all(np.isfinite(prices)) and np.all(np.isfinite(returns)) and np.all(np.isfinite(volume))
     ):
         raise FloatingPointError("simulation produced a non-finite value")
 

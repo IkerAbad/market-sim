@@ -39,6 +39,26 @@ def test_autocorrelation_rejects_excessive_lag() -> None:
         autocorrelation(np.arange(10.0), max_lag=10)
 
 
+def test_autocorrelation_rejects_negative_lag() -> None:
+    with pytest.raises(ValueError):
+        autocorrelation(np.arange(10.0), max_lag=-1)
+
+
+def test_autocorrelation_rejects_two_dimensional_input() -> None:
+    with pytest.raises(ValueError):
+        autocorrelation(np.ones((10, 2)), max_lag=2)
+
+
+def test_autocorrelation_rejects_short_series() -> None:
+    with pytest.raises(ValueError):
+        autocorrelation(np.array([1.0]), max_lag=0)
+
+
+def test_autocorrelation_rejects_non_finite_values() -> None:
+    with pytest.raises(ValueError):
+        autocorrelation(np.array([1.0, np.nan, 2.0]), max_lag=1)
+
+
 def test_kurtosis_hand_built_series() -> None:
     values = np.array([1.0, 2.0, 3.0, 4.0])
     assert kurtosis(values) == pytest.approx(1.64)
@@ -55,6 +75,11 @@ def test_kurtosis_of_normal_sample() -> None:
     assert kurtosis(values) == pytest.approx(3.0, abs=0.1)
 
 
+def test_kurtosis_rejects_constant_series() -> None:
+    with pytest.raises(ValueError):
+        kurtosis(np.ones(10))
+
+
 def test_tail_ratio_of_normal_sample() -> None:
     rng = np.random.default_rng(43)
     values = rng.normal(size=200_000)
@@ -66,6 +91,16 @@ def test_tail_ratio_detects_fat_tails() -> None:
     rng = np.random.default_rng(44)
     values = rng.standard_t(df=3, size=100_000)
     assert tail_exceedance_ratio(values, sigma=4.0) > 3.0
+
+
+def test_tail_ratio_rejects_bad_sigma() -> None:
+    with pytest.raises(ValueError):
+        tail_exceedance_ratio(np.arange(10.0), sigma=0.0)
+
+
+def test_tail_ratio_rejects_constant_series() -> None:
+    with pytest.raises(ValueError):
+        tail_exceedance_ratio(np.ones(10))
 
 
 def test_compute_metrics_keys_and_volume_correlation() -> None:
@@ -99,6 +134,24 @@ def test_compute_metrics_rejects_constant_volume() -> None:
         )
 
 
+def test_compute_metrics_rejects_short_series() -> None:
+    with pytest.raises(ValueError):
+        compute_metrics(
+            np.arange(50.0),
+            np.ones(50) + np.arange(50.0),
+            MetricsParams(acf_lags=50),
+        )
+
+
+def test_compute_metrics_rejects_non_finite_volume() -> None:
+    rng = np.random.default_rng(47)
+    returns = rng.normal(size=1000)
+    volume = np.abs(returns)
+    volume[0] = np.nan
+    with pytest.raises(ValueError):
+        compute_metrics(returns, volume, MetricsParams(acf_lags=50))
+
+
 def test_evaluate_facts_and_markdown() -> None:
     metrics = {
         "kurtosis": 5.0,
@@ -121,3 +174,13 @@ def test_evaluate_facts_and_markdown() -> None:
     failing_rows = evaluate_facts(metrics, params)
     assert not all_facts_pass(failing_rows)
     assert failing_rows[0]["passes"] is False
+
+
+def test_evaluate_facts_rejects_missing_metric() -> None:
+    with pytest.raises(ValueError):
+        evaluate_facts({"kurtosis": 5.0}, MetricsParams())
+
+
+def test_all_facts_pass_rejects_empty_table() -> None:
+    with pytest.raises(ValueError):
+        all_facts_pass([])

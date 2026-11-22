@@ -5,8 +5,10 @@ traders.  The repository measures five stylized facts of financial returns with
 explicit statistics instead of asserting them in prose.
 
 The model is a controlled experiment, not a forecast.  The baseline run
-reproduces all five facts under the stated criteria.  The sensitivity analysis
-shows where that success comes from and which parameter changes break it.
+reproduces all five facts under the stated criteria.  A 20-seed hold-out is
+reported in `docs/robustness.md`: all six statistic rows pass on all 20 seeds.
+The sensitivity analysis shows where that success comes from and which parameter
+changes break it.
 
 ## Model
 
@@ -137,6 +139,7 @@ Then:
 python -m pip install -e ".[dev]"
 python scripts/run_simulation.py --config configs/baseline.json --output results
 python scripts/make_figures.py --results results --output docs
+python scripts/run_ensemble.py --config configs/baseline.json --seeds 1001-1020 --jobs 8
 python -m pytest
 ```
 
@@ -160,8 +163,8 @@ assert (first.returns == second.returns).all()
 The simulation uses `numpy.random.default_rng`, which is PCG64.  NumPy does not
 promise bit-for-bit identical `Generator` streams across every version, so the
 committed numbers were produced in one reference environment: Python 3.14.5,
-NumPy 2.5.5, Matplotlib 3.11.2, Windows 11.  CI runs Python 3.12 and 3.13 on
-Ubuntu and Windows.
+NumPy 2.5.5, Matplotlib 3.11.2, Windows 11.  CI runs Python 3.12, 3.13 and
+3.14 on Ubuntu and Windows.
 
 ## Results
 
@@ -228,6 +231,44 @@ Returns are close to zero and mostly inside the 95% white-noise band.
 Absolute returns remain positive and decay slowly.  Lag zero is omitted because
 it is always one.
 
+## Robustness across seeds
+
+The baseline table is one seed.  `docs/robustness.md` repeats the full run on
+seeds 1001 to 1020, which were not used to choose the parameters.  The command
+is:
+
+```bash
+python scripts/run_ensemble.py --config configs/baseline.json --seeds 1001-1020 --jobs 8
+```
+
+| Statistic | Median | 5% | 95% | Min | Max | Seeds passing |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Kurtosis | 7.112 | 5.15 | 39.26 | 4.833 | 406.5 | 20/20 |
+| ACF(returns, lag 1) | -0.002353 | -0.01004 | 0.00415 | -0.01542 | 0.01213 | 20/20 |
+| ACF(abs(returns), lag 1) | 0.183 | 0.1483 | 0.2639 | 0.1423 | 0.3959 | 20/20 |
+| ACF(abs(returns), lag 50) | 0.1202 | 0.09319 | 0.212 | 0.08556 | 0.2351 | 20/20 |
+| corr(volume, abs(returns)) | 0.549 | 0.5096 | 0.6287 | 0.5093 | 0.7696 | 20/20 |
+| Tail ratio | 51.31 | 35.15 | 69.32 | 34.1 | 69.62 | 20/20 |
+
+The per-seed values are in `docs/robustness.csv`.
+
+All six statistic rows pass on all 20 seeds.  The distribution matters as much
+as the pass count:
+
+- Kurtosis has median 7.112, a 5th percentile of 5.15 and a maximum of 406.5.
+  The mean, 27.91, is dominated by one extreme seed.  The baseline value 5.488
+  is a low draw, close to the 5th percentile.  The direction of fact 1 is
+  robust.  The magnitude is not stable.
+- The return ACF1 stays between -0.0154 and 0.0121, with median -0.00235.  It
+  never approaches the 0.05 threshold.
+- The absolute-return ACF is at least 0.1423 at lag 1 and 0.0856 at lag 50.
+  Volatility clustering is strong at every horizon in the ensemble.
+- Volume correlation has a minimum of 0.5093 and a median of 0.5490.
+- The tail ratio has a minimum of 34.1 and a median of 51.31.
+
+The ensemble is a seed hold-out, not a model-specification hold-out.  It does
+not test whether a different model would produce the same facts.
+
 ## Sensitivity
 
 The baseline parameters were chosen by hand after inspecting these statistics.
@@ -256,8 +297,8 @@ mechanism behind the clustering.
 
 The seed changes magnitudes.  Kurtosis moves from 5.488 to 4.523 and
 ACF(abs,50) from 0.1176 to 0.0809 when the seed changes from 20261122 to 7.
-All six statistic rows still pass.  A single seed is not a precise estimate of
-a population moment.
+All six statistic rows still pass.  The 20-seed ensemble above shows the full
+sampling distribution.
 
 ## Limitations
 
@@ -274,8 +315,10 @@ a population moment.
   gross demand.
 - The slow decay of absolute-return autocorrelation is not true long memory.
   It is a mixture of AR(1) processes with a finite maximum memory.
-- Fat-tail estimates are sample-dependent.  Kurtosis ranges from 4.523 to
-  5.488 for the two seeds reported here.
+- Fat-tail estimates are heavy-tailed across seeds.  In the 20-seed hold-out,
+  kurtosis has median 7.112 and maximum 406.5.  The baseline 5.488 is a low
+  draw.  The fact "kurtosis > 3" holds in 20/20 seeds, but the magnitude is not
+  stable.
 - There is no order book, no wealth update, no dividends, no short-selling
   constraint, no leverage effect and no gain-loss asymmetry.
 - The thresholds used to classify the facts are choices.  They are explicit in
@@ -287,20 +330,33 @@ a population moment.
 python -m pytest
 ```
 
-The suite has 41 tests:
+The suite has 109 tests and 97% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
   population and the simulated series,
 - kurtosis and autocorrelation on hand-built series with known values,
-- tail and volume statistics, including constant-series errors,
+- tail and volume statistics, including constant-series and non-finite errors,
 - the simulator with extreme parameters, checking that every output stays
   finite,
-- the price-impact fixed point when demand is zero,
-- CSV round-trips and configuration overrides,
+- the price-impact fixed point when demand is zero and the zero-impact case,
+- CSV round-trips, malformed CSV files and configuration validation branches,
+- multi-seed ensemble, summary and CSV export,
 - all three figure functions with the Agg backend.
 
-The CI workflow runs the suite on Ubuntu and Windows with Python 3.12 and 3.13.
-The workflow file is `.github/workflows/ci.yml`.
+The CI workflow runs the quality job, the test matrix on Ubuntu and Windows
+with Python 3.12, 3.13 and 3.14, and a wheel build with an installed-wheel
+smoke test.  The workflow file is `.github/workflows/ci.yml`.
+
+## Quality gates
+
+- `ruff check .` and `ruff format --check .`
+- `mypy src` in strict mode
+- `pytest --cov=market_sim --cov-fail-under=90`
+- `python -m build` and `twine check dist/*`
+- installation and smoke test of the built wheel
+
+These gates run on every push and pull request.  The local commands are in
+`CONTRIBUTING.md`.
 
 ## License
 
@@ -308,13 +364,17 @@ MIT.  Copyright (c) 2026 Iker Abad.
 
 Author: Iker Abad (GitHub: IkerAbad).
 
+Citation metadata is in `CITATION.cff`.  Release notes are in `CHANGELOG.md`.
+Contributor setup is in `CONTRIBUTING.md`.
+
 ## Español
 
 Simulador de mercado basado en agentes, escrito para medir hechos estilizados
 en lugar de afirmarlos.  El modelo es un juguete controlado, no una previsión.
-La ejecución base reproduce los cinco hechos con los criterios indicados.  El
-análisis de sensibilidad muestra de dónde sale ese resultado y qué parámetro lo
-rompe.
+La ejecución base reproduce los cinco hechos con los criterios indicados.  Una
+retención de 20 semillas, no usadas para elegir los parámetros, también los
+reproduce en 20/20.  El análisis de sensibilidad muestra de dónde sale ese
+resultado y qué parámetro lo rompe.
 
 ### Modelo
 
@@ -382,6 +442,29 @@ La tabla principal es, por tanto, un ajuste dentro de la muestra, no una
 predicción ciega.  `docs/sensitivity.md` contiene el experimento completo y los
 comandos exactos.
 
+### Robustez
+
+La tabla base es una sola semilla.  `docs/robustness.md` repite la ejecución
+completa con las semillas 1001 a 1020, que no se usaron para elegir los
+parámetros.
+
+| Estadístico | Mediana | Mínimo | Máximo | Semillas que cumplen |
+| --- | ---: | ---: | ---: | ---: |
+| Curtosis | 7.112 | 4.833 | 406.5 | 20/20 |
+| ACF(retornos, 1) | -0.002353 | -0.01542 | 0.01213 | 20/20 |
+| ACF(abs, 1) | 0.183 | 0.1423 | 0.3959 | 20/20 |
+| ACF(abs, 50) | 0.1202 | 0.08556 | 0.2351 | 20/20 |
+| corr(volumen, abs) | 0.549 | 0.5093 | 0.7696 | 20/20 |
+| Ratio de colas | 51.31 | 34.1 | 69.62 | 20/20 |
+
+Los valores por semilla están en `docs/robustness.csv`.
+
+Las seis filas pasan en 20/20 semillas.  La curtosis tiene mediana 7.112 y
+máximo 406.5, así que el hecho 1 es robusto en dirección pero no en magnitud.
+La ACF de los valores absolutos no baja de 0.1423 en el lag 1 ni de 0.0856 en
+el lag 50.  La correlación volumen-volatilidad no baja de 0.5093.  Es una
+retención de semillas, no de especificación del modelo.
+
 ### Qué rompe el resultado
 
 - Si se sube `max_chartist_demand` de 0.1 a 0.5, la ACF de los retornos sube a
@@ -393,7 +476,7 @@ comandos exactos.
   actividad persistente es el mecanismo que genera la agrupación de volatilidad.
 - Si se cambia la semilla de 20261122 a 7, todos los criterios siguen
   cumpliéndose, pero las magnitudes cambian: curtosis 4.523 y ACF(abs,50)
-  0.0809.  Una sola semilla no estima con precisión un momento poblacional.
+  0.0809.  La tabla de 20 semillas muestra la distribución completa.
 - No hay un ajuste universal.  El resultado depende de los parámetros y de la
   semilla.
 
@@ -406,6 +489,9 @@ comandos exactos.
   nivel realista de seguimiento de tendencia sea compatible con el hecho 2.
 - La correlación volumen-volatilidad es en parte mecánica.
 - El decaimiento lento no es memoria larga verdadera.
+- La curtosis es muy inestable entre semillas.  En la retención de 20 semillas
+  tiene mediana 7.112 y máximo 406.5.  El valor base 5.488 es bajo.  El hecho 1
+  se cumple en 20/20, pero la magnitud no es estable.
 - No hay libro de órdenes, dividendos, noticias, efecto apalancamiento ni
   asimetría entre ganancias y pérdidas.
 - Los umbrales son decisiones explícitas y se pueden cambiar en el fichero de
@@ -417,6 +503,7 @@ comandos exactos.
 python -m pip install -e ".[dev]"
 python scripts/run_simulation.py --config configs/baseline.json --output results
 python scripts/make_figures.py --results results --output docs
+python scripts/run_ensemble.py --config configs/baseline.json --seeds 1001-1020 --jobs 8
 python -m pytest
 ```
 
@@ -424,8 +511,15 @@ Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
 valores absolutos.
 
+La suite tiene 109 tests y 97% de cobertura de ramas.  Las mismas comprobaciones
+que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src` y
+`pytest --cov=market_sim --cov-fail-under=90`.
+
 ### Licencia
 
 MIT.  Copyright (c) 2026 Iker Abad.
 
 Autor: Iker Abad (GitHub: IkerAbad).
+
+Los metadatos de cita están en `CITATION.cff`.  Las notas de versión están en
+`CHANGELOG.md`.

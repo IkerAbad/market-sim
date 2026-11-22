@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, cast
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -45,7 +46,7 @@ def plot_price_series(
     output = _prepare_output(path)
     steps = np.arange(start_step, start_step + values.size)
 
-    with plt.rc_context(_STYLE):
+    with plt.rc_context(cast(Any, _STYLE)):
         figure, axis = plt.subplots(figsize=(10, 4))
         axis.plot(steps, values, color=_BLUE, linewidth=0.9)
         if fundamental_value is not None:
@@ -93,7 +94,7 @@ def plot_return_histogram(
     )
 
     output = _prepare_output(path)
-    with plt.rc_context(_STYLE):
+    with plt.rc_context(cast(Any, _STYLE)):
         figure, axis = plt.subplots(figsize=(7, 4.5))
         axis.hist(
             centred,
@@ -133,7 +134,7 @@ def plot_autocorrelation(
     confidence = 1.96 / np.sqrt(values.size)
 
     output = _prepare_output(path)
-    with plt.rc_context(_STYLE):
+    with plt.rc_context(cast(Any, _STYLE)):
         figure, axis = plt.subplots(figsize=(10, 4))
         axis.axhspan(
             -confidence,

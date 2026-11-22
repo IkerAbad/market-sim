@@ -111,8 +111,10 @@ def main() -> int:
         "Command:",
         "",
         "```",
-        f"python scripts/run_simulation.py --config {args.config.as_posix()} "
-        f"--output {args.output.as_posix()}",
+        (
+            f"python scripts/run_simulation.py --config {args.config.as_posix()} "
+            f"--output {args.output.as_posix()}"
+        ),
         "```",
         "",
         f"- Seed: {config.seed}",

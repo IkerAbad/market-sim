@@ -48,11 +48,11 @@ class Population:
     activity: np.ndarray
 
     @classmethod
-    def create(cls, params: ModelParams, rng: Generator) -> "Population":
+    def create(cls, params: ModelParams, rng: Generator) -> Population:
         """Draw a population from ``params`` using ``rng``."""
         n = params.n_agents
-        n_f = int(round(n * params.fundamentalist_fraction))
-        n_c = int(round(n * params.chartist_fraction))
+        n_f = round(n * params.fundamentalist_fraction)
+        n_c = round(n * params.chartist_fraction)
         n_f = min(n_f, n)
         n_c = min(n_c, n - n_f)
 
@@ -61,12 +61,8 @@ class Population:
         kind[n_f : n_f + n_c] = CHARTIST
         kind[n_f + n_c :] = NOISE
 
-        memory = rng.integers(
-            params.memory_min, params.memory_max + 1, size=n, dtype=np.int64
-        )
-        risk_aversion = rng.uniform(
-            params.risk_aversion_min, params.risk_aversion_max, size=n
-        )
+        memory = rng.integers(params.memory_min, params.memory_max + 1, size=n, dtype=np.int64)
+        risk_aversion = rng.uniform(params.risk_aversion_min, params.risk_aversion_max, size=n)
         wealth = rng.uniform(params.wealth_min, params.wealth_max, size=n)
         wealth = wealth / wealth.mean()
         bias = rng.normal(0.0, params.fundamental_bias_std, size=n)
@@ -100,8 +96,7 @@ class Population:
         sigma = self.params.activity_sigma
         innovation = rng.normal(0.0, 1.0, size=self.kind.size)
         self.log_activity = (
-            self.rho * self.log_activity
-            + sigma * np.sqrt(1.0 - self.rho**2) * innovation
+            self.rho * self.log_activity + sigma * np.sqrt(1.0 - self.rho**2) * innovation
         )
         # The clip is a numerical guard for deliberately extreme test values.
         self.log_activity = np.clip(self.log_activity, -_ACTIVITY_CLIP, _ACTIVITY_CLIP)
@@ -153,4 +148,4 @@ class Population:
                 * rng.normal(0.0, 1.0, size=int(np.sum(noise)))
             )
 
-        return demand * self.activity
+        return np.asarray(demand * self.activity, dtype=float)

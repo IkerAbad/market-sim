@@ -8,9 +8,10 @@ the values before any simulation starts.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -147,7 +148,7 @@ def load_config(path: str | Path) -> SimulationConfig:
     with Path(path).open("r", encoding="utf-8") as handle:
         data = json.load(handle)
     if not isinstance(data, dict):
-        raise ValueError("the configuration root must be a JSON object")
+        raise TypeError("the configuration root must be a JSON object")
     return config_from_dict(data)
 
 
@@ -172,9 +173,7 @@ def _coerce(value: Any, current: Any) -> Any:
     return value
 
 
-def apply_overrides(
-    config: SimulationConfig, overrides: Mapping[str, Any]
-) -> SimulationConfig:
+def apply_overrides(config: SimulationConfig, overrides: Mapping[str, Any]) -> SimulationConfig:
     """Return a new configuration with dotted-key overrides applied.
 
     Keys use the JSON layout, for example ``model.price_impact`` or ``seed``.

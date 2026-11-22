@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
+from market_sim.agents import Population
 from market_sim.config import MetricsParams, ModelParams, SimulationConfig
 from market_sim.market import load_series_csv, save_series_csv, simulate
 
@@ -125,3 +127,45 @@ def test_zero_demand_is_a_fixed_point() -> None:
     assert np.array_equal(result.returns, np.zeros(100))
     assert np.allclose(result.prices, np.log(100.0))
     assert np.array_equal(result.volume, np.zeros(100))
+
+
+def test_zero_price_impact_leaves_price_unchanged() -> None:
+    config = SimulationConfig(
+        seed=2,
+        n_steps=100,
+        burn_in=10,
+        model=ModelParams(n_agents=20, price_impact=0.0),
+        metrics=MetricsParams(acf_lags=50),
+    )
+    result = simulate(config)
+    assert np.array_equal(result.returns, np.zeros(100))
+    assert np.allclose(result.prices, np.log(100.0))
+    assert np.any(result.volume > 0)
+
+
+def test_save_creates_parent_directories(tmp_path) -> None:
+    result = simulate(make_config())
+    path = save_series_csv(result, tmp_path / "nested" / "series.csv")
+    assert path.exists()
+
+
+def test_load_rejects_missing_header(tmp_path) -> None:
+    path = tmp_path / "bad.csv"
+    path.write_text("", encoding="utf-8")
+    with pytest.raises(ValueError):
+        load_series_csv(path)
+
+
+def test_non_finite_guard(monkeypatch) -> None:
+    def bad_demands(
+        self: Population,
+        prices: np.ndarray,
+        t: int,
+        fundamental_log: float,
+        rng: np.random.Generator,
+    ) -> np.ndarray:
+        return np.full(self.kind.size, np.nan)
+
+    monkeypatch.setattr(Population, "demands", bad_demands)
+    with pytest.raises(FloatingPointError):
+        simulate(make_config())
