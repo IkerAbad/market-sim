@@ -1,0 +1,37 @@
+{
+  "seed": 20261122,
+  "n_steps": 101000,
+  "burn_in": 1000,
+  "model": {
+    "n_agents": 200,
+    "fundamentalist_fraction": 0.3,
+    "chartist_fraction": 0.4,
+    "memory_min": 5,
+    "memory_max": 1000,
+    "risk_aversion_min": 0.5,
+    "risk_aversion_max": 2.0,
+    "wealth_min": 0.5,
+    "wealth_max": 1.5,
+    "fundamental_bias_std": 0.03,
+    "activity_sigma": 1.0,
+    "price_impact": 0.05,
+    "kappa_fundamentalist": 1.0,
+    "kappa_chartist": 1.0,
+    "fundamental_scale": 1.0,
+    "chartist_scale": 0.002,
+    "max_fundamentalist_demand": 1.0,
+    "max_chartist_demand": 0.1,
+    "noise_demand_scale": 1.0,
+    "fundamental_value": 100.0
+  },
+  "metrics": {
+    "acf_lags": 200,
+    "tail_sigma": 4.0,
+    "kurtosis_threshold": 3.0,
+    "return_acf_threshold": 0.05,
+    "abs_acf_lag1_threshold": 0.05,
+    "abs_acf_lag50_threshold": 0.02,
+    "volume_corr_threshold": 0.2,
+    "tail_ratio_threshold": 1.0
+  }
+}
