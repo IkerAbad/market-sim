@@ -354,6 +354,7 @@ smoke test.  The workflow file is `.github/workflows/ci.yml`.
 - `pytest --cov=market_sim --cov-fail-under=90`
 - `python -m build` and `twine check dist/*`
 - installation and smoke test of the built wheel
+- full 101,000-step baseline, all three figures and a 3-seed ensemble in CI
 
 These gates run on every push and pull request.  The local commands are in
 `CONTRIBUTING.md`.
