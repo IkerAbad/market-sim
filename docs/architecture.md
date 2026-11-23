@@ -30,6 +30,7 @@ market_sim.stylized  ->  compute_metrics  ->  evaluate_facts
         +--> scripts/run_benchmark_rates.py
         +--> scripts/run_strict_criteria.py
         +--> scripts/run_null_distribution.py
+        +--> scripts/run_discrimination.py
         +--> scripts/run_sample_size.py
         +--> scripts/run_price_volume.py
         +--> scripts/run_stability.py
@@ -55,6 +56,7 @@ market_sim.stylized  ->  compute_metrics  ->  evaluate_facts
 | `benchmark_rates.py` | Pass rates of the price facts over many series |
 | `strict.py` | Strict tail criteria on the per-seed hold-out |
 | `null_distribution.py` | Gaussian quantiles of the five price statistics |
+| `discrimination.py` | AUC and threshold grid against the benchmarks |
 | `benchmark.py` | Wall-clock timing |
 | `real_data.py` | User-supplied return or price series |
 | `price_volume.py` | Price-gap and volume diagnostics |

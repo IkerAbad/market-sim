@@ -164,3 +164,9 @@ jobs:
           python scripts/run_null_distribution.py --series 100 --n 20000 --report /tmp/null_distribution.md --csv /tmp/null_distribution.csv
           test -s /tmp/null_distribution.md
           test -s /tmp/null_distribution.csv
+      - name: Discrimination grid
+        run: |
+          python scripts/run_discrimination.py --series 10 --n 20000 --report /tmp/discrimination.md --csv /tmp/discrimination.csv --grid-csv /tmp/discrimination_grid.csv --figure /tmp/discrimination.png
+          test -s /tmp/discrimination.md
+          test -s /tmp/discrimination_grid.csv
+          test -s /tmp/discrimination.png

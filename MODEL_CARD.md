@@ -7,7 +7,7 @@ study whether a small set of behavioural rules can generate five stylized facts
 of return series.  The model is not estimated from market data and is not a
 forecasting system.
 
-- Version: 0.7.0
+- Version: 0.8.0
 - License: MIT
 - Author: Iker Abad
 - Repository: https://github.com/IkerAbad/market-sim
@@ -85,7 +85,11 @@ thresholds to the hold-out and lists the four seeds that fail only kurtosis.
 `docs/null_distribution.md` gives the Gaussian quantiles: the threshold of 3 is
 the median of the null and the model value 5.488 is above the 95% quantile of
 3.028.  The absolute-return autocorrelations are far above the Gaussian 95%
-quantile.
+quantile.  `docs/discrimination.md` measures the AUC against GARCH: 0.962 for
+kurtosis, 0.989 for ACF(abs, 50) and 0.517 for ACF(abs, 1).  The slow
+clustering fact is the stronger discriminator.  At kurtosis > 4 and tail ratio
+> 10 the model passes 50/50 seeds and GARCH 93/100.  At kurtosis > 5 the model
+passes 46/50 and GARCH falls to 5/100.
 
 Five additional diagnostics are in `docs/additional_facts.md`.  The model
 reproduces the long-memory DFA exponent and aggregational Gaussianity but not

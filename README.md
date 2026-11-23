@@ -192,9 +192,9 @@ NumPy 2.5.5, Matplotlib 3.11.2, Windows 11.  CI runs Python 3.12, 3.13 and
 `scripts/reproduce_all.py` runs the baseline, the figures, the ensembles, the
 bootstrap, the phase map, the ablations, the sensitivity, the thresholds, the
 additional facts, the benchmarks, the benchmark pass rates, the strict hold-out
-table, the Gaussian null distribution, the performance timing, the sample-size
-scan, the price-volume diagnostics, the block-stability table and the
-cross-seed block table in order:
+table, the Gaussian null distribution, the discrimination grid, the performance
+timing, the sample-size scan, the price-volume diagnostics, the block-stability
+table and the cross-seed block table in order:
 
 ```bash
 python scripts/reproduce_all.py --dry-run
@@ -658,6 +658,40 @@ small in magnitude, near the 5% quantile of the null.  The absolute-return
 autocorrelations are far above the Gaussian 95% quantile, and that is the part
 of the table that a Gaussian process cannot reproduce.
 
+## Discrimination from the benchmarks
+
+A pass rate says whether a fact passes.  It does not say how much the fact
+separates the model from a benchmark.  `docs/discrimination.md` measures that
+with the area under the ROC curve: the probability that a random model value
+is on the model side of a random benchmark value.  A value of 0.5 means no
+separation.  The command is:
+
+```bash
+python scripts/run_discrimination.py --config configs/baseline.json --series 100 --n 100000
+```
+
+| Statistic | Model median | GARCH median | Gaussian median | AUC vs GARCH | AUC vs Gaussian |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Kurtosis | 6.304 | 4.28 | 3 | 0.962 | 1.000 |
+| ACF(returns, 1) | -0.003142 | 0.000766 | 0.0002724 | 0.426 | 0.351 |
+| ACF(abs, 1) | 0.169 | 0.1674 | -2.617e-05 | 0.517 | 1.000 |
+| ACF(abs, 50) | 0.1126 | 0.05986 | -3.298e-05 | 0.989 | 1.000 |
+| Tail ratio | 44.36 | 25.73 | 0.9472 | 0.985 | 1.000 |
+
+Kurtosis separates the model from GARCH with AUC 0.962.  ACF(abs, 50) is
+stronger, with 0.989.  ACF(abs, 1) is close to a coin flip at 0.517, so the
+fast clustering fact does not distinguish the two models.  The slow
+autocorrelation is the stronger discriminator.
+
+The threshold grid in the same report shows the separation region.  At
+kurtosis > 4 and tail ratio > 10 the model passes all five in 50/50 seeds and
+GARCH in 93/100.  At kurtosis > 5 the model passes 46/50 and GARCH falls to
+5/100.  The separation is sharpest between 4 and 5.  The figure
+`docs/discrimination.png` shows the model pass rate, the GARCH pass rate and
+their difference over the full grid.
+
+![Discrimination grid](docs/discrimination.png)
+
 ## Price and volume
 
 `docs/price_volume.md` describes the price gap around the fundamental value and
@@ -789,7 +823,7 @@ the model.  The data are not committed.
 python -m pytest
 ```
 
-The suite has 306 tests and 99% branch coverage:
+The suite has 312 tests and 99% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
   population, the simulated series and the committed baseline summary,
@@ -804,7 +838,8 @@ The suite has 306 tests and 99% branch coverage:
   including aggregational Gaussianity,
 - component ablations, one-at-a-time sensitivity and threshold sensitivity,
 - synthetic benchmarks, benchmark pass rates, strict hold-out criteria,
-  Gaussian null quantiles and performance timing,
+  Gaussian null quantiles, discrimination AUC and the threshold grid, and
+  performance timing,
 - finite-sample, price-volume, block-stability and cross-seed block
   diagnostics,
 - the real-data comparison loader and table,
@@ -1182,6 +1217,39 @@ cerca del cuantil 5% de la nula.  Las autocorrelaciones de valores absolutos
 quedan muy por encima del cuantil 95% gaussiano, y esa es la parte que un
 proceso gaussiano no reproduce.
 
+### Discriminación frente a los benchmarks
+
+Una tasa de aprobados dice si un hecho pasa.  No dice cuánto separa el hecho al
+modelo de un benchmark.  `docs/discrimination.md` lo mide con el área bajo la
+curva ROC: la probabilidad de que un valor aleatorio del modelo quede del lado
+del modelo respecto a un valor aleatorio del benchmark.  0.5 significa que no
+separa.  El comando es:
+
+```bash
+python scripts/run_discrimination.py --config configs/baseline.json --series 100 --n 100000
+```
+
+| Estadística | Mediana del modelo | Mediana GARCH | Mediana gaussiana | AUC vs GARCH | AUC vs gaussiana |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Curtosis | 6.304 | 4.28 | 3 | 0.962 | 1.000 |
+| ACF(retornos, 1) | -0.003142 | 0.000766 | 0.0002724 | 0.426 | 0.351 |
+| ACF(abs, 1) | 0.169 | 0.1674 | -2.617e-05 | 0.517 | 1.000 |
+| ACF(abs, 50) | 0.1126 | 0.05986 | -3.298e-05 | 0.989 | 1.000 |
+| Ratio de colas | 44.36 | 25.73 | 0.9472 | 0.985 | 1.000 |
+
+La curtosis separa el modelo de GARCH con AUC 0.962.  ACF(abs, 50) es más
+fuerte, 0.989.  ACF(abs, 1) se queda en 0.517, casi una moneda al aire, así que
+el hecho de agrupación rápida no distingue los dos modelos.  La autocorrelación
+lenta es el discriminante más fuerte.
+
+La rejilla de umbrales del mismo informe muestra la región de separación.  Con
+curtosis > 4 y ratio de colas > 10 el modelo pasa los cinco en 50/50 semillas y
+GARCH en 93/100.  Con curtosis > 5 el modelo pasa 46/50 y GARCH cae a 5/100.
+La separación es más nítida entre 4 y 5.  La figura `docs/discrimination.png`
+muestra la tasa del modelo, la de GARCH y su diferencia en toda la rejilla.
+
+![Rejilla de discriminación](docs/discrimination.png)
+
 ### Precio y volumen
 
 `docs/price_volume.md` mide el hueco del precio y el volumen.  El hueco tiene
@@ -1305,7 +1373,7 @@ Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
 valores absolutos.  El mapa de parámetros está en `docs/phase_diagram.png`.
 
-La suite tiene 306 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
+La suite tiene 312 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
 que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src`,
 `pytest --cov=market_sim --cov-fail-under=98`, `python scripts/check_docs.py`,
 `python scripts/check_versions.py`, `python scripts/check_results.py`,

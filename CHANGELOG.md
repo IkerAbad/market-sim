@@ -6,6 +6,21 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-23
+
+### Added
+
+- Discrimination analysis in `docs/discrimination.md`, with the AUC of each
+  price statistic against GARCH and Gaussian, a 6 by 6 threshold grid, and the
+  heatmap `docs/discrimination.png`.
+- The grid shows the separation region: at kurtosis > 4 and tail ratio > 10 the
+  model passes 50/50 seeds and GARCH 93/100, while at kurtosis > 5 the model
+  passes 46/50 and GARCH falls to 5/100.
+
+### Changed
+
+- The suite has 312 tests and 99% branch coverage.
+
 ## [0.7.0] - 2026-11-23
 
 ### Added

@@ -44,6 +44,14 @@ Volume is gross demand and the return is proportional to net demand.  Both are
 driven by the same demands, so a positive correlation is built into the
 accounting.  See [the main results](../README.md#reading-the-table).
 
+## Which fact distinguishes the model from GARCH?
+
+The slow clustering fact.  `docs/discrimination.md` reports an AUC of 0.989 for
+ACF(abs, 50) against GARCH, 0.962 for kurtosis, 0.985 for the tail ratio and
+0.517 for ACF(abs, 1).  The fast clustering fact is almost a coin flip because
+GARCH also produces it.  The slow autocorrelation is the part of the model that
+GARCH does not reproduce.
+
 ## Why does the kurtosis criterion pass Gaussian samples?
 
 The criterion is kurtosis above 3, and the sample kurtosis of Gaussian returns

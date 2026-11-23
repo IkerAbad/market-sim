@@ -152,6 +152,16 @@ def full_commands(jobs: int = 8, include_50_seeds: bool = True) -> list[list[str
             ],
             [
                 python,
+                "scripts/run_discrimination.py",
+                "--config",
+                "configs/baseline.json",
+                "--series",
+                "100",
+                "--n",
+                "100000",
+            ],
+            [
+                python,
                 "scripts/run_benchmark.py",
                 "--config",
                 "configs/baseline.json",

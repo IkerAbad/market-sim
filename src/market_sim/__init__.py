@@ -55,6 +55,18 @@ from .config import (
     config_to_dict,
     load_config,
 )
+from .discrimination import (
+    DiscriminationRow,
+    ThresholdCell,
+    auc,
+    discrimination_rows,
+    format_discrimination_markdown,
+    format_grid_markdown,
+    plot_threshold_grid,
+    threshold_grid,
+    write_discrimination_csv,
+    write_grid_csv,
+)
 from .docs import check_docs
 from .ensemble import (
     EnsembleSummary,
@@ -142,7 +154,7 @@ from .thresholds import (
 )
 from .version_check import check_versions
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 
 __all__ = [
     "ABLATIONS",
@@ -163,6 +175,7 @@ __all__ = [
     "BlockSeedResult",
     "BootstrapResult",
     "BootstrapSummary",
+    "DiscriminationRow",
     "EnsembleSummary",
     "FactRate",
     "MetricsParams",
@@ -180,11 +193,13 @@ __all__ = [
     "StrictFact",
     "StrictFailure",
     "StrictSummary",
+    "ThresholdCell",
     "ThresholdRow",
     "additional_metrics",
     "aggregational_kurtosis",
     "all_facts_pass",
     "apply_overrides",
+    "auc",
     "autocorrelation",
     "benchmark_metrics",
     "block_indices",
@@ -204,6 +219,7 @@ __all__ = [
     "config_to_dict",
     "correlation",
     "dfa_hurst",
+    "discrimination_rows",
     "evaluate_benchmark",
     "evaluate_facts",
     "evaluate_strict",
@@ -211,6 +227,8 @@ __all__ = [
     "extract_release_notes",
     "format_aggregational_table",
     "format_block_ensemble_markdown",
+    "format_discrimination_markdown",
+    "format_grid_markdown",
     "format_markdown_table",
     "format_null_markdown",
     "format_rates_markdown",
@@ -233,6 +251,7 @@ __all__ = [
     "null_statistics",
     "parse_seeds",
     "plot_phase_heatmap",
+    "plot_threshold_grid",
     "price_diagnostics",
     "rate_metrics",
     "rates_from_metrics_csv",
@@ -257,12 +276,15 @@ __all__ = [
     "summarize_sample_size",
     "summarize_sensitivity",
     "tail_exceedance_ratio",
+    "threshold_grid",
     "time_simulation",
     "volume_diagnostics",
     "volume_volatility_lead_lag",
     "wilson_interval",
     "write_block_ensemble_csv",
+    "write_discrimination_csv",
     "write_ensemble_csv",
+    "write_grid_csv",
     "write_null_csv",
     "write_rates_csv",
     "write_stability_csv",
