@@ -22,6 +22,14 @@ def full_commands(jobs: int = 8, include_50_seeds: bool = True) -> list[list[str
         [python, "scripts/make_figures.py", "--results", "results", "--output", "docs"],
         [
             python,
+            "scripts/compare_baseline.py",
+            "--results",
+            "results",
+            "--expected",
+            "docs/baseline_metrics.json",
+        ],
+        [
+            python,
             "scripts/run_ensemble.py",
             "--config",
             "configs/baseline.json",

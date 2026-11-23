@@ -119,8 +119,26 @@ jobs:
       - name: Compare
         run: |
           find hashes -name hash.txt -print -exec cat {} \;
-          test "$(find hashes -name hash.txt | wc -l)" -eq 2
-          test "$(find hashes -name hash.txt -exec cat {} \; | sort -u | wc -l)" -eq 1
+          python - <<'PY'
+          import glob
+          import json
+          import sys
+
+          files = sorted(glob.glob("hashes/*/hash.txt"))
+          if len(files) != 2:
+              print(f"expected two hash files, found {files}", file=sys.stderr)
+              raise SystemExit(1)
+          values = [json.load(open(path, encoding="utf-8")) for path in files]
+          print("metrics:", [value["metrics"] for value in values])
+          print("series: ", [value["series"] for value in values])
+          if values[0]["series"] != values[1]["series"]:
+              print("series hashes differ", file=sys.stderr)
+              raise SystemExit(1)
+          if values[0]["metrics"] != values[1]["metrics"]:
+              print("metrics hashes differ", file=sys.stderr)
+              raise SystemExit(1)
+          print("result hashes match")
+          PY
 
   build:
     name: build and install wheel

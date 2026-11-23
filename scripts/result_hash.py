@@ -8,6 +8,7 @@ python scripts/result_hash.py --results results --output hash.txt
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -28,7 +29,15 @@ def main() -> int:
     print(f"series:  {hashes['series']}")
     print(f"combined: {combined}")
     if args.output is not None:
-        args.output.write_text(combined + "\n", encoding="utf-8")
+        payload = {
+            "metrics": hashes["metrics"],
+            "series": hashes["series"],
+            "combined": combined,
+        }
+        args.output.write_text(
+            json.dumps(payload, indent=2) + "\n",
+            encoding="utf-8",
+        )
     return 0
 
 

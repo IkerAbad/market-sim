@@ -14,6 +14,7 @@ def test_full_commands_cover_the_scripts() -> None:
     for script in (
         "run_simulation.py",
         "make_figures.py",
+        "compare_baseline.py",
         "run_ensemble.py",
         "run_inference.py",
         "run_phase_diagram.py",
