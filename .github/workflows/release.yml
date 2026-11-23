@@ -49,7 +49,7 @@ jobs:
 
   release:
     name: create GitHub release
-    needs: pypi
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
