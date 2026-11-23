@@ -19,6 +19,8 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 - README table checker `scripts/check_readme.py`.  Every results table in the
   README is compared with its generated report.
 - Stable result hash helper `scripts/result_hash.py`.
+- Distribution published on PyPI as `market-sim==1.0.0` and container image
+  `ghcr.io/ikerabad/market-sim:1.0.0`.
 
 ### Changed
 
