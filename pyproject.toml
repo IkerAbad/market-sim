@@ -18,9 +18,11 @@ keywords = [
     "simulation",
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
@@ -47,6 +49,8 @@ dev = [
 Homepage = "https://github.com/IkerAbad/market-sim"
 Repository = "https://github.com/IkerAbad/market-sim"
 Issues = "https://github.com/IkerAbad/market-sim/issues"
+Changelog = "https://github.com/IkerAbad/market-sim/blob/main/CHANGELOG.md"
+Paper = "https://github.com/IkerAbad/market-sim/blob/main/docs/paper.md"
 
 [project.scripts]
 market-sim = "market_sim.cli:main"

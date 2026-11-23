@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from market_sim.result_hash import combined_result_hash, result_hashes
+from market_sim.result_hash import (
+    canonical_metrics_hash,
+    combined_result_hash,
+    result_hashes,
+)
 
 
 def make_results(
@@ -39,3 +43,17 @@ def test_content_change_changes_the_hash(tmp_path) -> None:
     first = make_results(tmp_path / "first")
     second = make_results(tmp_path / "second", series="step,price\n1,101\n")
     assert combined_result_hash(first) != combined_result_hash(second)
+
+
+def test_canonical_metrics_round_to_six_significant_digits(tmp_path) -> None:
+    first = make_results(tmp_path / "first", metrics='{"k": 5.487789}\n')
+    second = make_results(tmp_path / "second", metrics='{"k": 5.487790}\n')
+    third = make_results(tmp_path / "third", metrics='{"k": 5.5}\n')
+    assert canonical_metrics_hash(first) == canonical_metrics_hash(second)
+    assert canonical_metrics_hash(first) != canonical_metrics_hash(third)
+
+
+def test_metric_formatting_does_not_change_the_hash(tmp_path) -> None:
+    first = make_results(tmp_path / "first", metrics='{"a": 1.0, "b": 2.0}\n')
+    second = make_results(tmp_path / "second", metrics='{"b": 2.0, "a": 1.0}\n')
+    assert canonical_metrics_hash(first) == canonical_metrics_hash(second)

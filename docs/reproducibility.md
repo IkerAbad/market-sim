@@ -101,8 +101,11 @@ baseline, builds the three figures, runs a 3-seed ensemble smoke test and
 installs the built wheel in a clean environment.  The pinned reference job
 regenerates the baseline and compares every metric with
 `docs/baseline_metrics.json` at a relative tolerance of 1e-9.  Two additional
-jobs run the baseline on Ubuntu and Windows with the pinned environment, hash
-`metrics.json` and `series.csv`, and compare the two hashes bit for bit.
+jobs run the baseline on Ubuntu and Windows with the pinned environment and
+compare the result hashes.  The series is hashed as written at ten decimal
+places.  The metrics are rounded to six significant digits before hashing,
+because the last bits of the full-precision floats depend on the platform math
+library.  The published metrics use four significant digits.
 
 ## Clean clone
 
