@@ -26,7 +26,7 @@ def test_result_hashes_are_stable(tmp_path) -> None:
     first = result_hashes(results)
     second = result_hashes(results)
     assert first == second
-    assert set(first) == {"metrics", "series"}
+    assert set(first) == {"metrics", "series", "raw_series"}
     assert combined_result_hash(results) == combined_result_hash(results)
 
 
@@ -63,3 +63,12 @@ def test_nested_values_are_canonical(tmp_path) -> None:
     metrics = '{"a": [1.0000001, 2.0, true, "x"], "b": 3}\n'
     results = make_results(tmp_path, metrics=metrics)
     assert len(canonical_metrics_hash(results)) == 64
+
+
+def test_series_are_rounded_before_hashing(tmp_path) -> None:
+    first = make_results(tmp_path / "first", series="step,price\n1,100.0000001\n")
+    second = make_results(tmp_path / "second", series="step,price\n1,100.0000002\n")
+    third = make_results(tmp_path / "third", series="step,price\n1,100.001\n")
+    assert result_hashes(first)["series"] == result_hashes(second)["series"]
+    assert result_hashes(first)["series"] != result_hashes(third)["series"]
+    assert result_hashes(first)["raw_series"] != result_hashes(second)["raw_series"]

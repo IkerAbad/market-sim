@@ -27,11 +27,13 @@ def main() -> int:
     combined = combined_result_hash(args.results)
     print(f"metrics: {hashes['metrics']}")
     print(f"series:  {hashes['series']}")
+    print(f"raw:     {hashes['raw_series']}")
     print(f"combined: {combined}")
     if args.output is not None:
         payload = {
             "metrics": hashes["metrics"],
             "series": hashes["series"],
+            "raw_series": hashes["raw_series"],
             "combined": combined,
         }
         args.output.write_text(

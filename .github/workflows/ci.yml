@@ -131,6 +131,7 @@ jobs:
           values = [json.load(open(path, encoding="utf-8")) for path in files]
           print("metrics:", [value["metrics"] for value in values])
           print("series: ", [value["series"] for value in values])
+          print("raw:    ", [value["raw_series"] for value in values])
           if values[0]["series"] != values[1]["series"]:
               print("series hashes differ", file=sys.stderr)
               raise SystemExit(1)
