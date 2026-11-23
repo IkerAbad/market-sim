@@ -95,8 +95,6 @@ def dfa_hurst(series: NumericSeries, scales: Sequence[int] | None = None) -> flo
     n = profile.size
     if scales is None:
         max_power = int(np.floor(np.log2(n // 4)))
-        if max_power < 3:
-            raise ValueError("series is too short for the default DFA scales")
         scale_values = 2 ** np.arange(3, max_power + 1)
     else:
         scale_values = np.asarray(scales, dtype=int)

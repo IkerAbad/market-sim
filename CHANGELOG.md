@@ -6,6 +6,26 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-23
+
+### Added
+
+- Finite-sample sensitivity at 10,000, 50,000, 100,000 and 200,000 steps in
+  `docs/sample_size.md`.
+- Price-gap and volume diagnostics in `docs/price_volume.md`.
+- Documentation link checker in `scripts/check_docs.py`.
+- Release workflow that builds the distribution and creates a GitHub release
+  from the matching `CHANGELOG.md` section.
+- Pinned reference constraints in `constraints-reference.txt` and a CI
+  reference job.
+- `Dockerfile` and a container smoke test in CI.
+
+### Changed
+
+- Coverage gate raised to 98%. The suite has 225 tests and 99% branch coverage.
+- README and model card include the sample-size, price-volume and container
+  analyses.
+
 ## [0.3.0] - 2026-11-22
 
 ### Added

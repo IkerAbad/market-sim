@@ -1,0 +1,16 @@
+statistic,value
+price_min,89.34580822
+price_max,111.5566539
+price_final,98.28648487
+gap_mean,-0.002645593059
+gap_std,0.02011492063
+gap_min,-0.1126558596
+gap_max,0.1093623828
+gap_ar1,0.9893343443
+gap_half_life,64.6415145
+volume_mean,0.2125615248
+volume_std,0.05421131033
+volume_kurtosis,5.990164415
+volume_acf1,0.5745877042
+volume_acf10,0.5589756577
+corr_volume_abs_return,0.5016431103

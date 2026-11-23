@@ -61,8 +61,6 @@ def kurtosis(x: np.ndarray | Iterable[float]) -> float:
         raise ValueError("kurtosis is undefined for a constant series")
     scaled = centred / scale
     variance = float(np.mean(scaled**2))
-    if variance == 0.0:
-        raise ValueError("kurtosis is undefined for a constant series")
     return float(np.mean(scaled**4) / variance**2)
 
 

@@ -323,6 +323,27 @@ but it stays above 3.
 These intervals are conditional on the model and the baseline parameters.
 They are not confidence intervals for real-market facts.
 
+## Sample size
+
+`docs/sample_size.md` reruns seeds 1001 to 1003 at 10,000, 50,000, 100,000 and
+200,000 steps.  The command is:
+
+```bash
+python scripts/run_sample_size.py --config configs/baseline.json --sizes 10000,50000,100000,200000 --seeds 1001-1003 --jobs 8
+```
+
+| Size | Seeds | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | corr | Tail | All-pass seeds |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10,000 | 3 | 5.987 | 0.0035 | 0.1620 | 0.0980 | 0.5308 | 48.53 | 3/3 |
+| 50,000 | 3 | 12.090 | -0.0045 | 0.1943 | 0.1479 | 0.5602 | 47.68 | 3/3 |
+| 100,000 | 3 | 11.542 | -0.0036 | 0.2048 | 0.1564 | 0.5728 | 51.77 | 3/3 |
+| 200,000 | 3 | 9.263 | -0.0048 | 0.1907 | 0.1450 | 0.5586 | 49.16 | 3/3 |
+
+All four sizes pass the six rows in all seeds.  Kurtosis is the most
+sample-dependent statistic: it moves from 5.987 at 10,000 steps to 12.090 at
+50,000, 11.542 at 100,000 and 9.263 at 200,000.  The other statistics are stable.
+The 100,000-step baseline is not a special case.
+
 ## Sensitivity
 
 The baseline parameters were chosen by hand after inspecting these statistics.
@@ -521,6 +542,32 @@ content is the endogenous volume and the explicit agent rules.  The volume fact
 is not in this table because the benchmarks have no volume.  This is a central
 limitation of the five-fact exercise.
 
+## Price and volume
+
+`docs/price_volume.md` describes the price gap around the fundamental value and
+the volume series.  The command is:
+
+```bash
+python scripts/run_price_volume.py --config configs/baseline.json --results results --report docs/price_volume.md
+```
+
+| Statistic | Value |
+| --- | ---: |
+| Minimum price | 89.35 |
+| Maximum price | 111.6 |
+| Mean log gap | -0.002646 |
+| Log gap standard deviation | 0.02011 |
+| Log gap AR(1) coefficient | 0.9893 |
+| Log gap half-life (steps) | 64.64 |
+| Volume kurtosis | 5.99 |
+| Volume ACF(1) | 0.5746 |
+| Volume ACF(10) | 0.559 |
+| corr(volume, abs(returns)) | 0.5016 |
+
+The price gap is persistent, with a half-life of 64.6 steps.  The volume is
+heavy-tailed and strongly autocorrelated.  These are descriptive diagnostics,
+not target facts.
+
 ## Bring your own data
 
 No market data are bundled.  `scripts/compare_real_data.py` compares any CSV
@@ -575,7 +622,7 @@ the model.  The data are not committed.
 python -m pytest
 ```
 
-The suite has 191 tests and 96% branch coverage:
+The suite has 225 tests and 99% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
   population and the simulated series,
@@ -589,26 +636,32 @@ The suite has 191 tests and 96% branch coverage:
 - multi-seed ensemble, bootstrap, phase grid and additional-facts diagnostics,
 - component ablations, one-at-a-time sensitivity and threshold sensitivity,
 - synthetic benchmarks and performance timing,
+- finite-sample and price-volume diagnostics,
 - the real-data comparison loader and table,
 - the command-line interface, including error paths and `python -m market_sim`,
+- documentation link checks and release-note extraction,
 - property-based tests with Hypothesis for statistical invariants,
 - all three figure functions with the Agg backend.
 
 The CI workflow runs the quality job, the test matrix on Ubuntu and Windows
-with Python 3.12, 3.13 and 3.14, a wheel build with an installed-wheel smoke
-test, and a full reproduction job.  The workflow file is
-`.github/workflows/ci.yml`.
+with Python 3.12, 3.13 and 3.14, a pinned reference-environment job, a wheel
+build with an installed-wheel smoke test, a container smoke test and a full
+reproduction job.  The workflow file is `.github/workflows/ci.yml`.
 
 ## Quality gates
 
 - `ruff check .` and `ruff format --check .`
 - `mypy src` in strict mode
-- `pytest --cov=market_sim --cov-fail-under=95`
+- `pytest --cov=market_sim --cov-fail-under=98`
+- `python scripts/check_docs.py` for local documentation links
 - `python -m build` and `twine check dist/*`
 - installation and smoke test of the built wheel
 - full 101,000-step baseline, all three figures and a 3-seed ensemble in CI
 - property-based tests with Hypothesis
 - pre-commit hooks for ruff, format and mypy
+- pinned reference environment in `constraints-reference.txt`
+- container smoke test in CI
+- release workflow on `v*` tags
 
 These gates run on every push and pull request.  The local commands are in
 `CONTRIBUTING.md`.
@@ -623,6 +676,27 @@ full table.  The command is:
 ```bash
 python scripts/run_benchmark.py --config configs/baseline.json --steps 10000,50000,100000
 ```
+
+## Releases
+
+Pushing a `v*` tag triggers `.github/workflows/release.yml`.  The workflow
+builds the sdist and wheel, runs `twine check`, extracts the matching section
+from `CHANGELOG.md` and creates the GitHub release with both artifacts.  The
+version in `pyproject.toml`, `CITATION.cff` and `src/market_sim/__init__.py`
+must match the tag.
+
+## Container
+
+The repository ships a `Dockerfile` with the package and the baseline
+configuration:
+
+```bash
+docker build -t market-sim .
+docker run --rm market-sim version
+docker run --rm market-sim simulate --config configs/baseline.json --output /tmp/results
+```
+
+CI builds the image and runs a 500-step simulation inside it.
 
 ## License
 
@@ -753,6 +827,13 @@ filas pasan con `activity_sigma` entre 1.0 y 1.5 y `max_chartist_demand` entre
 `max_chartist_demand = 1.0` falla el hecho 2.  La celda base está marcada en
 rojo en la figura.
 
+### Tamaño de muestra
+
+`docs/sample_size.md` repite el modelo con 10.000, 50.000, 100.000 y 200.000
+pasos y 3 semillas.  Las seis filas pasan en los cuatro tamaños y en 3/3
+semillas.  La curtosis es la más dependiente: 5.987, 12.090, 11.542 y 9.263.
+El resto es estable.  La base de 100.000 no es un caso especial.
+
 ### Qué rompe el resultado
 
 - Si se sube `max_chartist_demand` de 0.1 a 0.5, la ACF de los retornos sube a
@@ -833,6 +914,13 @@ distinguen el modelo de un benchmark GARCH.  El valor añadido del modelo es el
 volumen endógeno y las reglas explícitas de los agentes.  La comparación omite
 el volumen porque los benchmarks no lo tienen.
 
+### Precio y volumen
+
+`docs/price_volume.md` mide el hueco del precio y el volumen.  El hueco tiene
+AR(1) 0.9893 y semivida 64.64 pasos.  El volumen tiene curtosis 5.99, ACF(1)
+0.5746 y ACF(10) 0.559.  La correlación con abs(retornos) es 0.5016.  Son
+diagnósticos descriptivos, no hechos objetivo.
+
 ### Rendimiento
 
 En la máquina de referencia (Ryzen 9 5900X, 32 GB DDR4-3600, Windows 11), el
@@ -853,6 +941,13 @@ La columna puede ser de retornos o de precios (`price` o `close`), que se
 convierten a retornos logarítmicos.  Usa `--acf-lags 50` para series de menos de
 200 observaciones.  La comparación usa los cinco hechos de precio y no calibra
 el modelo.  Los datos no se suben al repositorio.
+
+### Contenedor
+
+```bash
+docker build -t market-sim .
+docker run --rm market-sim version
+```
 
 ### Limitaciones
 
@@ -897,9 +992,9 @@ Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
 valores absolutos.  El mapa de parámetros está en `docs/phase_diagram.png`.
 
-La suite tiene 191 tests y 96% de cobertura de ramas.  Las mismas comprobaciones
+La suite tiene 225 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
 que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src` y
-`pytest --cov=market_sim --cov-fail-under=95`.
+`pytest --cov=market_sim --cov-fail-under=98`.
 
 ### Licencia
 

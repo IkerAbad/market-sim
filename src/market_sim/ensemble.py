@@ -88,6 +88,8 @@ def parse_seeds(spec: str) -> list[int]:
         token = part.strip()
         if not token:
             continue
+        if token.startswith("-"):
+            raise ValueError("seeds must be non-negative")
         if "-" in token:
             start_text, end_text = token.split("-", 1)
             start = int(start_text)
@@ -96,10 +98,7 @@ def parse_seeds(spec: str) -> list[int]:
                 raise ValueError(f"invalid seed range: {token!r}")
             seeds.update(range(start, end + 1))
         else:
-            value = int(token)
-            if value < 0:
-                raise ValueError(f"seeds must be non-negative: {token!r}")
-            seeds.add(value)
+            seeds.add(int(token))
     if not seeds:
         raise ValueError("at least one seed is required")
     return sorted(seeds)

@@ -11,7 +11,9 @@ The committed numbers and figures were produced with:
 
 CI runs the tests on Ubuntu and Windows with Python 3.12, 3.13 and 3.14.  The
 exact float values are tied to the reference environment because NumPy does not
-promise bit-for-bit identical `Generator` streams across every version.
+promise bit-for-bit identical `Generator` streams across every version.  The
+reference versions are pinned in `constraints-reference.txt` and a CI job
+installs that file before running the tests.
 
 ## Setup
 
@@ -47,6 +49,8 @@ python scripts/run_thresholds.py --input docs/robustness.csv --report docs/thres
 python scripts/run_extra_facts.py --results results --report docs/additional_facts.md
 python scripts/run_benchmarks.py --config configs/baseline.json --results results --report docs/benchmarks.md
 python scripts/run_benchmark.py --config configs/baseline.json --steps 10000,50000,100000
+python scripts/run_sample_size.py --config configs/baseline.json --sizes 10000,50000,100000,200000 --seeds 1001-1003 --jobs 8
+python scripts/run_price_volume.py --config configs/baseline.json --results results --report docs/price_volume.md
 ```
 
 The ensemble, phase map, ablation and sensitivity runners use a process pool.
@@ -58,10 +62,20 @@ settings used for the committed reports.
 `scripts/compare_real_data.py` is a separate tool for a user-supplied CSV.  It
 is not part of the committed outputs because the data are not packaged.
 
+## Container
+
+```bash
+docker build -t market-sim .
+docker run --rm market-sim version
+docker run --rm market-sim simulate --config configs/baseline.json --output /tmp/results
+```
+
+CI builds the image and runs a 500-step simulation inside it.
+
 ## Tests and build
 
 ```bash
-pytest --cov=market_sim --cov-report=term-missing --cov-fail-under=95
+pytest --cov=market_sim --cov-report=term-missing --cov-fail-under=98
 ruff check .
 ruff format --check .
 mypy src
@@ -91,6 +105,8 @@ installs the built wheel in a clean environment.
 | `docs/thresholds.csv` | `18F8BF5F55FBBF68D5605D04AA1D6AB25DBD30FFA0E60FB6A5EDC7D831E80153` |
 | `docs/benchmarks.csv` | `4DD42A024FF55C7E24FCEFF9C8F994E6CEC622A4AE1D69C5AB1EE07FE0FA3E3B` |
 | `docs/performance.csv` | `A1B4533529576001C410697F8ED15A5C37942C493E97603F3E44A58878265591` |
+| `docs/sample_size.csv` | `F319DDDAB1ADC1B5E85359960C29B88D65FE2FDEE51877DC8EDE11669EDE57B8` |
+| `docs/price_volume.csv` | `6948769BC613DEC23C717ED13BD6758376FD1D362848649F7DB374AF3FFB7602` |
 | `docs/baseline_metrics.json` | `31F33A81C8465CFC2606B8FF300A8151DF4421594CB7C936AA09A3C544020DE5` |
 
 The three baseline figures are byte-identical when regenerated in the reference

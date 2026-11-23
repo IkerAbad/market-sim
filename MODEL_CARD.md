@@ -7,7 +7,7 @@ study whether a small set of behavioural rules can generate five stylized facts
 of return series.  The model is not estimated from market data and is not a
 forecasting system.
 
-- Version: 0.3.0
+- Version: 0.4.0
 - License: MIT
 - Author: Iker Abad
 - Repository: https://github.com/IkerAbad/market-sim
@@ -69,8 +69,11 @@ An extended 50-seed hold-out in `docs/robustness_50.md` passes all six rows in
 50 of 50 seeds.  The 95% Wilson interval for the all-pass rate is
 [0.929, 1.000].  The one-at-a-time parameter scan is in
 `docs/sensitivity_full.md` and the threshold scan is in `docs/thresholds.md`.
-A GARCH(1,1) benchmark also passes the five price facts, so the facts are not
-unique to the agent-based model.
+A finite-sample scan passes at 10,000, 50,000, 100,000 and 200,000 steps.  The
+price gap has an AR(1) half-life of 64.6 steps and the volume is heavy-tailed
+and autocorrelated.  These diagnostics are in `docs/sample_size.md` and
+`docs/price_volume.md`.  A GARCH(1,1) benchmark also passes the five price
+facts, so the facts are not unique to the agent-based model.
 
 Four additional diagnostics are in `docs/additional_facts.md`.  The model
 reproduces the long-memory DFA exponent but not the leverage effect, gain/loss
@@ -126,7 +129,7 @@ python -m pip install -e ".[dev]"
 python scripts/run_simulation.py --config configs/baseline.json --output results
 python scripts/make_figures.py --results results --output docs
 python scripts/run_ensemble.py --config configs/baseline.json --seeds 1001-1020 --jobs 8
-python -m pytest --cov=market_sim --cov-fail-under=95
+python -m pytest --cov=market_sim --cov-fail-under=98
 ```
 
 The exact environment and output hashes are in `docs/reproducibility.md`.

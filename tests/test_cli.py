@@ -26,7 +26,7 @@ def write_small_config(tmp_path: Path) -> Path:
 
 def test_version(capsys) -> None:
     assert main(["version"]) == 0
-    assert "0.3.0" in capsys.readouterr().out
+    assert "0.4.0" in capsys.readouterr().out
 
 
 def test_simulate_cli(tmp_path) -> None:
@@ -234,4 +234,4 @@ def test_python_module_entrypoint(monkeypatch, capsys) -> None:
     with pytest.raises(SystemExit) as exc:
         runpy.run_module("market_sim", run_name="__main__")
     assert exc.value.code == 0
-    assert "0.3.0" in capsys.readouterr().out
+    assert "0.4.0" in capsys.readouterr().out

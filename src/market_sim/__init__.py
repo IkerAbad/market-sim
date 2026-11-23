@@ -33,6 +33,7 @@ from .config import (
     config_to_dict,
     load_config,
 )
+from .docs import check_docs
 from .ensemble import (
     EnsembleSummary,
     SeedResult,
@@ -59,7 +60,15 @@ from .phase import (
     run_phase_grid,
     summarize_phase,
 )
+from .price_volume import price_diagnostics, run_diagnostics, volume_diagnostics
 from .real_data import compare_metrics, load_returns_csv
+from .release import extract_release_notes
+from .sample_size import (
+    SampleSizePoint,
+    SampleSizeSummary,
+    run_sample_size_grid,
+    summarize_sample_size,
+)
 from .sensitivity import (
     SENSITIVITY_VARIANTS,
     run_sensitivity_grid,
@@ -81,7 +90,7 @@ from .thresholds import (
     load_metrics_csv,
 )
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "ABLATIONS",
@@ -102,6 +111,8 @@ __all__ = [
     "PhasePoint",
     "PhaseSummary",
     "Population",
+    "SampleSizePoint",
+    "SampleSizeSummary",
     "SeedResult",
     "SimulationConfig",
     "SimulationResult",
@@ -113,6 +124,7 @@ __all__ = [
     "benchmark_metrics",
     "block_indices",
     "bootstrap_metrics",
+    "check_docs",
     "compare_metrics",
     "compute_metrics",
     "config_from_dict",
@@ -122,6 +134,7 @@ __all__ = [
     "evaluate_benchmark",
     "evaluate_facts",
     "evaluate_thresholds",
+    "extract_release_notes",
     "format_markdown_table",
     "format_summary_markdown",
     "gain_loss_asymmetry",
@@ -135,9 +148,12 @@ __all__ = [
     "load_series_csv",
     "parse_seeds",
     "plot_phase_heatmap",
+    "price_diagnostics",
     "run_ablation_grid",
+    "run_diagnostics",
     "run_ensemble",
     "run_phase_grid",
+    "run_sample_size_grid",
     "run_seed",
     "run_sensitivity_grid",
     "save_series_csv",
@@ -146,9 +162,11 @@ __all__ = [
     "summarize_ablations",
     "summarize_ensemble",
     "summarize_phase",
+    "summarize_sample_size",
     "summarize_sensitivity",
     "tail_exceedance_ratio",
     "time_simulation",
+    "volume_diagnostics",
     "volume_volatility_lead_lag",
     "wilson_interval",
     "write_ensemble_csv",

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "market-sim"
-version = "0.3.0"
+version = "0.4.0"
 description = "Agent-based toy market simulator for stylized facts of financial returns"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -84,7 +84,7 @@ branch = true
 
 [tool.coverage.report]
 show_missing = true
-fail_under = 95
+fail_under = 98
 
 [tool.coverage.html]
 directory = "htmlcov"
