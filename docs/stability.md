@@ -39,4 +39,4 @@ statistics are recomputed inside the block, so the table shows whether
 the full-sample result comes from the whole window or from one episode.
 Kurtosis is the least stable statistic because it is driven by the
 largest returns.  The block table is descriptive and is not used as a
-target fact.
+target fact.  The cross-seed version is in `docs/block_ensemble.md`.

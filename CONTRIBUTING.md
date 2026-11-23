@@ -23,6 +23,7 @@ python scripts/check_docs.py
 python scripts/check_versions.py
 python scripts/check_results.py
 python scripts/build_api_docs.py --check
+python scripts/check_hashes.py
 python -m build
 ```
 

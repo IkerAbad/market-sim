@@ -6,6 +6,30 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-23
+
+### Added
+
+- Benchmark pass rates over 100 synthetic series per process in
+  `docs/benchmark_rates.md`, with the original criteria and with stricter tail
+  criteria.
+- Cross-seed block stability in `docs/block_ensemble.md` and
+  `docs/block_ensemble.csv`.  Twenty seeds and ten blocks per seed give 200
+  blocks.
+- Aggregational Gaussianity in the additional facts, with kurtosis at
+  horizons 1, 5, 20 and 60.
+- Output hash checker in `scripts/check_hashes.py` and a CI step.
+- Pre-commit hooks for documentation links, versions, the README table, the API
+  reference and the output hashes.
+- A test that every `scripts/run_*.py` file is in the one-command reproduction.
+
+### Changed
+
+- The additional-facts table now has five rows and the model passes two.
+- The README, model card and FAQ document the weak original tail thresholds and
+  the stricter benchmark result.
+- The suite has 284 tests and 99% branch coverage.
+
 ## [0.5.0] - 2026-11-23
 
 ### Added

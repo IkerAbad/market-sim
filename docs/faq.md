@@ -9,9 +9,13 @@ fat tails.  See [the ablation study](ablations.md).
 ## Why does GARCH also pass the five price facts?
 
 Because the five facts are not unique to an agent-based model.  A GARCH(1,1)
-process produces fat tails and volatility clustering.  The agent-based model
+process produces fat tails and volatility clustering.  At the original
+thresholds GARCH passes all five facts in 100 of 100 samples.  The original
+kurtosis and tail-ratio thresholds are weak: Gaussian samples pass them about
+half of the time.  With kurtosis above 5 and tail ratio above 10 the model
+passes all five in 46 of 50 seeds and GARCH in 5 of 100.  The agent-based model
 adds an endogenous volume and explicit behavioural rules.  See
-[the benchmarks](benchmarks.md).
+[the benchmarks](benchmarks.md) and [the pass rates](benchmark_rates.md).
 
 ## Why keep the three agent types if they are not necessary?
 
@@ -40,6 +44,16 @@ Volume is gross demand and the return is proportional to net demand.  Both are
 driven by the same demands, so a positive correlation is built into the
 accounting.  See [the main results](../README.md#reading-the-table).
 
+## Why does the kurtosis criterion pass Gaussian samples?
+
+The criterion is kurtosis above 3, and the sample kurtosis of Gaussian returns
+is noisy around 3.  In 100 Gaussian samples of 100,000 returns, 52 pass.  The
+tail-ratio criterion is similarly weak, with 47 of 100 Gaussian samples
+passing.  With kurtosis above 5 and tail ratio above 10 no Gaussian sample
+passes, the model passes 46 of 50 seeds and GARCH passes 5 of 100.  The main
+table keeps the original thresholds because they were fixed before the
+benchmark-rate runs.  See [the pass rates](benchmark_rates.md).
+
 ## What does "seed hold-out" mean?
 
 The baseline parameters were chosen while looking at one seed.  The hold-out
@@ -54,10 +68,12 @@ simulated window but is not a power law.
 
 ## Is the result driven by one episode?
 
-No for this baseline run.  `docs/stability.md` splits the 100,000-step window
+No for the baseline run.  `docs/stability.md` splits the 100,000-step window
 into ten contiguous blocks and recomputes the six statistics in each block.
-Every statistic meets its criterion in all ten blocks.  Kurtosis is the least
-stable row, with a block minimum of 3.584 against a threshold of 3.
+Every statistic meets its criterion in all ten blocks.  `docs/block_ensemble.md`
+repeats the split on 20 hold-out seeds, which gives 200 blocks.  Five statistics
+pass in all 200 blocks and the return autocorrelation passes in 199.  The single
+failure is seed 1020, block 10, with -0.05138 against a limit of 0.05.
 
 ## How do I use my own data?
 

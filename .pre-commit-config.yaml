@@ -16,3 +16,28 @@ repos:
         entry: mypy src
         language: system
         pass_filenames: false
+      - id: docs
+        name: documentation links
+        entry: python scripts/check_docs.py
+        language: system
+        pass_filenames: false
+      - id: versions
+        name: version consistency
+        entry: python scripts/check_versions.py
+        language: system
+        pass_filenames: false
+      - id: results
+        name: README results table
+        entry: python scripts/check_results.py
+        language: system
+        pass_filenames: false
+      - id: api-docs
+        name: API reference
+        entry: python scripts/build_api_docs.py --check
+        language: system
+        pass_filenames: false
+      - id: hashes
+        name: output hashes
+        entry: python scripts/check_hashes.py
+        language: system
+        pass_filenames: false

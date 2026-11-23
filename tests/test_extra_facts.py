@@ -7,9 +7,11 @@ import pytest
 
 from market_sim.extra_facts import (
     additional_metrics,
+    aggregational_kurtosis,
     dfa_hurst,
     evaluate_additional_facts,
     format_additional_table,
+    format_aggregational_table,
     gain_loss_asymmetry,
     leverage_effect,
     leverage_profile,
@@ -149,8 +151,28 @@ def test_additional_metrics_keys() -> None:
         "dfa_hurst_abs",
         "volume_volatility_best_lag",
         "volume_volatility_best_corr",
+        "kurtosis_h1",
+        "kurtosis_h5",
+        "kurtosis_h20",
+        "kurtosis_h60",
     }
     assert all(np.isfinite(float(value)) for value in metrics.values())
+
+
+def test_aggregational_kurtosis() -> None:
+    rng = np.random.default_rng(9)
+    returns = rng.standard_t(df=4, size=10000)
+    values = aggregational_kurtosis(returns)
+    assert set(values) == {1, 5, 20, 60}
+    assert values[1] > values[60]
+    with pytest.raises(ValueError):
+        aggregational_kurtosis(returns, horizons=(0,))
+    with pytest.raises(ValueError):
+        aggregational_kurtosis(np.array([1.0, 2.0, 3.0, 4.0]), horizons=(2,))
+    with pytest.raises(ValueError):
+        aggregational_kurtosis(np.array([1.0, np.nan, 3.0, 4.0]), horizons=(1,))
+    with pytest.raises(ValueError):
+        aggregational_kurtosis(np.arange(10.0).reshape(2, 5))
 
 
 def test_evaluate_additional_facts() -> None:
@@ -159,9 +181,11 @@ def test_evaluate_additional_facts() -> None:
         "gain_loss_volatility_ratio": 1.2,
         "dfa_hurst_abs": 0.7,
         "volume_volatility_best_lag": 2,
+        "kurtosis_h1": 5.0,
+        "kurtosis_h60": 3.5,
     }
     rows = evaluate_additional_facts(passing)
-    assert len(rows) == 4
+    assert len(rows) == 5
     assert all(row["passes"] for row in rows)
     table = format_additional_table(rows)
     assert "| Additional fact | Statistic | Value | Criterion | Pass |" in table
@@ -172,6 +196,13 @@ def test_evaluate_additional_facts() -> None:
     assert rows[0]["passes"] is False
 
 
+def test_aggregational_table() -> None:
+    metrics = {"kurtosis_h1": 5.0, "kurtosis_h5": 4.5, "kurtosis_h20": 4.0, "kurtosis_h60": 3.5}
+    table = format_aggregational_table(metrics)
+    assert "| Horizon (steps) | Kurtosis |" in table
+    assert "| 60 | 3.5 |" in table
+
+
 def test_write_additional_csv(tmp_path) -> None:
     rows = evaluate_additional_facts(
         {
@@ -179,10 +210,12 @@ def test_write_additional_csv(tmp_path) -> None:
             "gain_loss_volatility_ratio": 1.2,
             "dfa_hurst_abs": 0.7,
             "volume_volatility_best_lag": 2,
+            "kurtosis_h1": 5.0,
+            "kurtosis_h60": 3.5,
         }
     )
     path = write_additional_csv(rows, tmp_path / "additional.csv")
     with path.open("r", encoding="utf-8", newline="") as handle:
         content = list(csv.DictReader(handle))
-    assert len(content) == 4
+    assert len(content) == 5
     assert set(content[0]) == {"fact", "statistic", "value", "criterion", "passes"}

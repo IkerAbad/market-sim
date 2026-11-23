@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 from market_sim.reproduce import full_commands, run_commands
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_full_commands_cover_the_scripts() -> None:
@@ -19,13 +22,23 @@ def test_full_commands_cover_the_scripts() -> None:
         "run_thresholds.py",
         "run_extra_facts.py",
         "run_benchmarks.py",
+        "run_benchmark_rates.py",
         "run_benchmark.py",
         "run_sample_size.py",
         "run_price_volume.py",
         "run_stability.py",
+        "run_block_ensemble.py",
     ):
         assert script in text
     assert "--jobs 2" in text
+
+
+def test_every_run_script_is_reproduced() -> None:
+    scripts = {path.name for path in (ROOT / "scripts").glob("run_*.py")}
+    commands = full_commands(jobs=2)
+    text = "\n".join(" ".join(command) for command in commands)
+    missing = sorted(script for script in scripts if script not in text)
+    assert missing == []
 
 
 def test_skip_50_seeds() -> None:

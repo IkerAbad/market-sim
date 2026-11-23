@@ -27,9 +27,11 @@ market_sim.stylized  ->  compute_metrics  ->  evaluate_facts
         +--> scripts/run_thresholds.py
         +--> scripts/run_extra_facts.py
         +--> scripts/run_benchmarks.py
+        +--> scripts/run_benchmark_rates.py
         +--> scripts/run_sample_size.py
         +--> scripts/run_price_volume.py
         +--> scripts/run_stability.py
+        +--> scripts/run_block_ensemble.py
 ```
 
 ## Modules
@@ -48,11 +50,13 @@ market_sim.stylized  ->  compute_metrics  ->  evaluate_facts
 | `sensitivity.py` | One-at-a-time parameter sensitivity |
 | `thresholds.py` | Threshold sensitivity over per-seed metrics |
 | `benchmarks.py` | Gaussian, Student-t and GARCH benchmarks |
+| `benchmark_rates.py` | Pass rates of the price facts over many series |
 | `benchmark.py` | Wall-clock timing |
 | `real_data.py` | User-supplied return or price series |
 | `price_volume.py` | Price-gap and volume diagnostics |
 | `sample_size.py` | Finite-sample sensitivity |
 | `stability.py` | Block stability of the six statistics |
+| `block_ensemble.py` | Block stability across seeds |
 | `docs.py` | Local Markdown link checks |
 | `release.py` | Release-note extraction from the changelog |
 | `version_check.py` | Version consistency across metadata files |
@@ -68,5 +72,5 @@ market_sim.stylized  ->  compute_metrics  ->  evaluate_facts
 - The simulation loop has no global state and no file access.
 - Statistics are pure functions of arrays.
 - Reports are generated from the same functions that produce the tables.
-- CI checks tests, types, links, versions, README values, API docs, the wheel,
-  the container and the full baseline.
+- CI checks tests, types, links, versions, README values, API docs, output
+  hashes, the wheel, the container and the full baseline.

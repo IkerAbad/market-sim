@@ -124,6 +124,16 @@ def full_commands(jobs: int = 8, include_50_seeds: bool = True) -> list[list[str
             ],
             [
                 python,
+                "scripts/run_benchmark_rates.py",
+                "--config",
+                "configs/baseline.json",
+                "--series",
+                "100",
+                "--n",
+                "100000",
+            ],
+            [
+                python,
                 "scripts/run_benchmark.py",
                 "--config",
                 "configs/baseline.json",
@@ -159,6 +169,18 @@ def full_commands(jobs: int = 8, include_50_seeds: bool = True) -> list[list[str
                 "results",
                 "--blocks",
                 "10",
+            ],
+            [
+                python,
+                "scripts/run_block_ensemble.py",
+                "--config",
+                "configs/baseline.json",
+                "--seeds",
+                "1001-1020",
+                "--blocks",
+                "10",
+                "--jobs",
+                str(jobs),
             ],
         ]
     )

@@ -11,6 +11,16 @@ from .ablations import (
 from .agents import CHARTIST, FUNDAMENTALIST, NOISE, Population
 from .api_docs import build_api_markdown, check_api_docs
 from .benchmark import BenchmarkResult, time_simulation
+from .benchmark_rates import (
+    BenchmarkRate,
+    FactRate,
+    format_rates_markdown,
+    metrics_from_generator,
+    metrics_from_metrics_csv,
+    rate_metrics,
+    rates_from_metrics_csv,
+    write_rates_csv,
+)
 from .benchmarks import (
     BenchmarkPoint,
     benchmark_metrics,
@@ -18,6 +28,16 @@ from .benchmarks import (
     garch11_returns,
     gaussian_returns,
     student_t_returns,
+)
+from .block_ensemble import (
+    BlockEnsembleSummary,
+    BlockSeedResult,
+    StatisticBlockRate,
+    format_block_ensemble_markdown,
+    run_block_ensemble,
+    run_block_seed,
+    summarize_block_ensemble,
+    write_block_ensemble_csv,
 )
 from .bootstrap import (
     BootstrapResult,
@@ -48,11 +68,14 @@ from .ensemble import (
 )
 from .extra_facts import (
     additional_metrics,
+    aggregational_kurtosis,
     dfa_hurst,
+    format_aggregational_table,
     gain_loss_asymmetry,
     leverage_effect,
     volume_volatility_lead_lag,
 )
+from .hashes import check_hashes
 from .market import SimulationResult, load_series_csv, save_series_csv, simulate
 from .phase import (
     PhasePoint,
@@ -101,7 +124,7 @@ from .thresholds import (
 )
 from .version_check import check_versions
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 __all__ = [
     "ABLATIONS",
@@ -113,11 +136,15 @@ __all__ = [
     "AblationResult",
     "AblationSummary",
     "BenchmarkPoint",
+    "BenchmarkRate",
     "BenchmarkResult",
+    "BlockEnsembleSummary",
     "BlockMetrics",
+    "BlockSeedResult",
     "BootstrapResult",
     "BootstrapSummary",
     "EnsembleSummary",
+    "FactRate",
     "MetricsParams",
     "ModelParams",
     "PhasePoint",
@@ -128,8 +155,10 @@ __all__ = [
     "SeedResult",
     "SimulationConfig",
     "SimulationResult",
+    "StatisticBlockRate",
     "ThresholdRow",
     "additional_metrics",
+    "aggregational_kurtosis",
     "all_facts_pass",
     "apply_overrides",
     "autocorrelation",
@@ -140,6 +169,7 @@ __all__ = [
     "build_api_markdown",
     "check_api_docs",
     "check_docs",
+    "check_hashes",
     "check_results",
     "check_versions",
     "compare_metrics",
@@ -152,7 +182,10 @@ __all__ = [
     "evaluate_facts",
     "evaluate_thresholds",
     "extract_release_notes",
+    "format_aggregational_table",
+    "format_block_ensemble_markdown",
     "format_markdown_table",
+    "format_rates_markdown",
     "format_stability_markdown",
     "format_summary_markdown",
     "full_commands",
@@ -165,10 +198,16 @@ __all__ = [
     "load_metrics_csv",
     "load_returns_csv",
     "load_series_csv",
+    "metrics_from_generator",
+    "metrics_from_metrics_csv",
     "parse_seeds",
     "plot_phase_heatmap",
     "price_diagnostics",
+    "rate_metrics",
+    "rates_from_metrics_csv",
     "run_ablation_grid",
+    "run_block_ensemble",
+    "run_block_seed",
     "run_commands",
     "run_diagnostics",
     "run_ensemble",
@@ -180,6 +219,7 @@ __all__ = [
     "simulate",
     "student_t_returns",
     "summarize_ablations",
+    "summarize_block_ensemble",
     "summarize_blocks",
     "summarize_ensemble",
     "summarize_phase",
@@ -190,6 +230,8 @@ __all__ = [
     "volume_diagnostics",
     "volume_volatility_lead_lag",
     "wilson_interval",
+    "write_block_ensemble_csv",
     "write_ensemble_csv",
+    "write_rates_csv",
     "write_stability_csv",
 ]

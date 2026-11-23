@@ -118,7 +118,8 @@ def main() -> int:
         "not distinguish the agent-based model from a simple stochastic-volatility",
         "benchmark.  The model's additional content is the endogenous volume and",
         "the explicit agent rules.  The volume fact is not in this table because",
-        "the benchmarks have no volume.",
+        "the benchmarks have no volume.  The pass rates over 100 series per",
+        "process are in `docs/benchmark_rates.md`.",
         "",
     ]
     args.report.parent.mkdir(parents=True, exist_ok=True)

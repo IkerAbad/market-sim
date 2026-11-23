@@ -19,6 +19,7 @@ from market_sim.extra_facts import (  # noqa: E402
     additional_metrics,
     evaluate_additional_facts,
     format_additional_table,
+    format_aggregational_table,
     write_additional_csv,
 )
 
@@ -57,6 +58,7 @@ def main() -> int:
     metrics = additional_metrics(data["return"], data["volume"])
     rows = evaluate_additional_facts(metrics)
     table = format_additional_table(rows)
+    aggregation_table = format_aggregational_table(metrics)
     write_additional_csv(rows, args.csv)
 
     pass_count = sum(bool(row["passes"]) for row in rows)
@@ -77,6 +79,14 @@ def main() -> int:
         "",
         table,
         "",
+        "## Kurtosis by horizon",
+        "",
+        "Returns are summed over disjoint blocks of the given length.  A model",
+        "with aggregational Gaussianity shows a kurtosis that falls towards three",
+        "as the horizon grows.",
+        "",
+        aggregation_table,
+        "",
         "## Reading",
         "",
         "These diagnostics are not part of the original five facts.  They are",
@@ -89,7 +99,9 @@ def main() -> int:
         "asymmetry compares the volatility of negative and positive returns.",
         "The DFA exponent measures long-range persistence in absolute returns.",
         "The volume lead-lag diagnostic finds the lag that maximises",
-        "`corr(volume[t], abs(return[t + lag]))`.",
+        "`corr(volume[t], abs(return[t + lag]))`.  Aggregational Gaussianity",
+        "compares the kurtosis of 60-step returns with the kurtosis of one-step",
+        "returns.",
         "",
     ]
     args.report.parent.mkdir(parents=True, exist_ok=True)

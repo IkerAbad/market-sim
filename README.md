@@ -7,8 +7,8 @@ explicit statistics instead of asserting them in prose.
 The model is a controlled experiment, not a forecast.  The baseline run
 reproduces all five facts under the stated criteria.  A 20-seed hold-out is
 reported in `docs/robustness.md`: all six statistic rows pass on all 20 seeds.
-Four additional diagnostics are reported separately, and the model reproduces
-only one of them.  An ablation study shows that the six statistic rows come from
+Five additional diagnostics are reported separately, and the model reproduces
+two of them.  An ablation study shows that the six statistic rows come from
 the persistent activity process, not from the three agent types.  A noise-only
 version passes all of them.  The types shape the price level and the return
 autocorrelation.  See `docs/ablations.md`.
@@ -191,8 +191,9 @@ NumPy 2.5.5, Matplotlib 3.11.2, Windows 11.  CI runs Python 3.12, 3.13 and
 
 `scripts/reproduce_all.py` runs the baseline, the figures, the ensembles, the
 bootstrap, the phase map, the ablations, the sensitivity, the thresholds, the
-additional facts, the benchmarks, the performance timing, the sample-size scan,
-the price-volume diagnostics and the block-stability table in order:
+additional facts, the benchmarks, the benchmark pass rates, the performance
+timing, the sample-size scan, the price-volume diagnostics, the block-stability
+table and the cross-seed block table in order:
 
 ```bash
 python scripts/reproduce_all.py --dry-run
@@ -505,7 +506,7 @@ the long-lag autocorrelation are the first to fail under very strict thresholds.
 ## Additional facts
 
 The five target facts are not the whole story.  `docs/additional_facts.md`
-measures four standard diagnostics that are outside the original list.  The
+measures five standard diagnostics that are outside the original list.  The
 command is:
 
 ```bash
@@ -518,8 +519,10 @@ python scripts/run_extra_facts.py --results results --report docs/additional_fac
 | Gain/loss asymmetry | std(losses) / std(gains) | 1 | > 1.05 | no |
 | Long memory of abs(returns) | DFA Hurst exponent | 0.8548 | > 0.60 | yes |
 | Volume leads volatility | best lag of corr(volume, abs(return)) | 0 | > 0 | no |
+| Aggregational Gaussianity | kurtosis(60-step) / kurtosis(1-step) | 0.6107 | < 1 | yes |
 
-The model reproduces the long-memory exponent and fails the other three.
+The model reproduces the long-memory exponent and aggregational Gaussianity,
+and fails the other three.
 
 - The leverage effect is essentially zero.  The activity and noise processes
   are symmetric, so future volatility does not react asymmetrically to the
@@ -532,6 +535,9 @@ The model reproduces the long-memory exponent and fails the other three.
 - The DFA exponent is 0.8548.  The mixture of activity processes produces
   persistent absolute returns, consistent with the slow autocorrelation in
   fact 3.
+- Aggregational Gaussianity holds.  The kurtosis falls from 5.488 at one step
+  to 5.250 at 5 steps, 4.916 at 20 steps and 3.351 at 60 steps.  The ratio of
+  the 60-step to the one-step value is 0.6107, below the threshold of 1.
 
 The thresholds are explicit choices, like the thresholds in the main table.  A
 failure here is a model limitation, not a simulator bug.
@@ -558,7 +564,49 @@ this sample.  The five facts alone therefore do not distinguish the agent-based
 model from a simple stochastic-volatility benchmark.  The model's additional
 content is the endogenous volume and the explicit agent rules.  The volume fact
 is not in this table because the benchmarks have no volume.  This is a central
-limitation of the five-fact exercise.
+limitation of the five-fact exercise at the original thresholds.  The next
+section repeats the benchmarks over many series and shows how stricter tail
+criteria change the picture.
+
+## Benchmark pass rates
+
+A single benchmark series can pass by luck.  `docs/benchmark_rates.md` repeats
+each synthetic process over 100 independent series of 100,000 returns and
+reports the fraction that passes each fact.  The model row uses the 50 seeds in
+`docs/robustness_50.csv`.  The command is:
+
+```bash
+python scripts/run_benchmark_rates.py --config configs/baseline.json --series 100 --n 100000
+```
+
+| Series | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | Tail ratio | All five |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| market-sim baseline | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 |
+| Gaussian | 52/100 | 100/100 | 0/100 | 0/100 | 47/100 | 0/100 |
+| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 |
+| GARCH(1,1) | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 |
+
+Under the original criteria the Gaussian process passes the kurtosis fact in
+52 of 100 samples and the tail ratio in 47 of 100.  A sample kurtosis above 3
+is weak evidence of fat tails at this sample size.  GARCH passes all five facts
+in every sample, so the original criteria do not identify the agent-based
+model.
+
+Tightening the two weak tail criteria to kurtosis above 5 and tail ratio above
+10 changes the result:
+
+| Series | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | Tail ratio | All five |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| market-sim baseline | 46/50 | 50/50 | 50/50 | 50/50 | 50/50 | 46/50 |
+| Gaussian | 0/100 | 100/100 | 0/100 | 0/100 | 0/100 | 0/100 |
+| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 |
+| GARCH(1,1) | 5/100 | 100/100 | 100/100 | 100/100 | 100/100 | 5/100 |
+
+The model passes all five stricter facts in 46 of 50 seeds, 92%.  GARCH passes
+in 5 of 100, and Gaussian and Student-t pass in none.  Raising the tail
+thresholds therefore separates the agent-based model from the benchmarks.  The
+main table keeps the original thresholds because they were fixed before these
+runs.  The weakness of the original tail criteria is a documented limitation.
 
 ## Price and volume
 
@@ -611,6 +659,29 @@ the least stable row: its block minimum is 3.584, close to the threshold of 3.
 This agrees with the seed and sample-size results.  The direction of the facts
 is robust, the magnitude of the tail statistics is not.
 
+## Block stability across seeds
+
+One seed is one draw.  `docs/block_ensemble.md` repeats the block analysis on
+the 20 hold-out seeds, which gives 200 blocks.  The command is:
+
+```bash
+python scripts/run_block_ensemble.py --config configs/baseline.json --seeds 1001-1020 --blocks 10 --jobs 8
+```
+
+| Statistic | Blocks passing | Rate |
+| --- | ---: | ---: |
+| Kurtosis | 200/200 | 100.0% |
+| ACF(returns, lag 1) | 199/200 | 99.5% |
+| ACF(abs(returns), lag 1) | 200/200 | 100.0% |
+| ACF(abs(returns), lag 50) | 200/200 | 100.0% |
+| corr(volume, abs(returns)) | 200/200 | 100.0% |
+| P(abs(r) > 4 sd) / P_normal | 200/200 | 100.0% |
+
+Nineteen of the 20 seeds pass all six statistics in all ten blocks.  The single
+failure is seed 1020, block 10, steps 90,000 to 100,000.  Its return
+autocorrelation is -0.05138, just outside the limit of 0.05.  Every other
+statistic in that block passes.
+
 ## Bring your own data
 
 No market data are bundled.  `scripts/compare_real_data.py` compares any CSV
@@ -653,9 +724,12 @@ the model.  The data are not committed.
   constraint.
 - The model does not reproduce the leverage effect, gain/loss asymmetry or
   volume lead-lag.  The measured values are in `docs/additional_facts.md`.
-- The five price facts are not unique to the model.  A GARCH(1,1) benchmark
-  also passes all five.  The model's additional content is the endogenous
-  volume and the explicit agent rules, not the uniqueness of the facts.
+- The five price facts are not unique to the model at the original thresholds.
+  A GARCH(1,1) benchmark also passes all five in 100/100 samples.  The original
+  kurtosis (>3) and tail-ratio (>1) criteria are weak: Gaussian samples pass
+  them in about half of the cases.  With kurtosis >5 and tail ratio >10 the
+  model passes all five in 46/50 seeds and GARCH in 5/100.  The main table keeps
+  the original thresholds because they were fixed before these runs.
 - The thresholds used to classify the facts are choices.  They are explicit in
   the configuration file so that a reader can change them.
 
@@ -665,7 +739,7 @@ the model.  The data are not committed.
 python -m pytest
 ```
 
-The suite has 261 tests and 99% branch coverage:
+The suite has 284 tests and 99% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
   population and the simulated series,
@@ -677,13 +751,15 @@ The suite has 261 tests and 99% branch coverage:
 - the price-impact fixed point when demand is zero and the zero-impact case,
 - CSV round-trips, malformed CSV files and configuration validation branches,
 - multi-seed ensemble, bootstrap, phase grid and additional-facts diagnostics,
+  including aggregational Gaussianity,
 - component ablations, one-at-a-time sensitivity and threshold sensitivity,
-- synthetic benchmarks and performance timing,
-- finite-sample, price-volume and block-stability diagnostics,
+- synthetic benchmarks, benchmark pass rates and performance timing,
+- finite-sample, price-volume, block-stability and cross-seed block
+  diagnostics,
 - the real-data comparison loader and table,
 - the command-line interface, including error paths and `python -m market_sim`,
-- documentation link checks, version, results-table and API-documentation
-  consistency checks and release-note extraction,
+- documentation link checks, version, results-table, API-documentation and
+  output-hash consistency checks and release-note extraction,
 - property-based tests with Hypothesis for statistical invariants,
 - all three figure functions with the Agg backend.
 
@@ -701,6 +777,7 @@ reproduction job.  The workflow file is `.github/workflows/ci.yml`.
 - `python scripts/check_versions.py` for version consistency
 - `python scripts/check_results.py` for README table consistency
 - `python scripts/build_api_docs.py --check` for API reference consistency
+- `python scripts/check_hashes.py` for committed output hashes
 - `python -m build` and `twine check dist/*`
 - installation and smoke test of the built wheel
 - full 101,000-step baseline, all three figures and a 3-seed ensemble in CI
@@ -760,8 +837,8 @@ Simulador de mercado basado en agentes, escrito para medir hechos estilizados
 en lugar de afirmarlos.  El modelo es un juguete controlado, no una previsión.
 La ejecución base reproduce los cinco hechos con los criterios indicados.  Una
 retención de 20 semillas, no usadas para elegir los parámetros, también los
-reproduce en 20/20.  Cuatro diagnósticos adicionales se reportan aparte, y el
-modelo solo reproduce uno de ellos.  La ablación muestra que las seis filas
+reproduce en 20/20.  Cinco diagnósticos adicionales se reportan aparte, y el
+modelo solo reproduce dos de ellos.  La ablación muestra que las seis filas
 vienen del proceso de actividad, no de los tres tipos.  Una versión solo de
 ruido las pasa todas.  El análisis de sensibilidad muestra de dónde sale ese
 resultado y qué parámetro lo rompe.
@@ -932,7 +1009,7 @@ ratio de colas pasa 20/20 con >20 y 12/20 con >50.
 
 ### Hechos adicionales
 
-`docs/additional_facts.md` mide cuatro diagnósticos fuera de la lista original.
+`docs/additional_facts.md` mide cinco diagnósticos fuera de la lista original.
 
 | Hecho adicional | Estadístico | Valor | Criterio | Cumple |
 | --- | --- | ---: | --- | :---: |
@@ -940,10 +1017,13 @@ ratio de colas pasa 20/20 con >20 y 12/20 con >50.
 | Asimetría ganancias/pérdidas | std(pérdidas) / std(ganancias) | 1 | > 1.05 | no |
 | Memoria larga de abs(retornos) | Exponente de Hurst DFA | 0.8548 | > 0.60 | sí |
 | El volumen adelanta la volatilidad | mejor lag de corr(volumen, abs(retorno)) | 0 | > 0 | no |
+| Gaussianidad agregacional | curtosis(60 pasos) / curtosis(1 paso) | 0.6107 | < 1 | sí |
 
-El modelo reproduce la memoria larga y falla los otros tres.  La actividad y el
-ruido son simétricos.  El volumen es demanda bruta contemporánea, así que no
-puede adelantar la volatilidad.  Los umbrales son decisiones explícitas.
+El modelo reproduce la memoria larga y la Gaussianidad agregacional, y falla
+los otros tres.  La actividad y el ruido son simétricos.  El volumen es demanda
+bruta contemporánea, así que no puede adelantar la volatilidad.  La curtosis
+baja de 5.488 en un paso a 3.351 en 60 pasos.  Los umbrales son decisiones
+explícitas.
 
 ### Comparación con benchmarks
 
@@ -961,6 +1041,45 @@ agrupación.  GARCH(1,1) pasa los cinco hechos de precio.  Los cinco hechos no
 distinguen el modelo de un benchmark GARCH.  El valor añadido del modelo es el
 volumen endógeno y las reglas explícitas de los agentes.  La comparación omite
 el volumen porque los benchmarks no lo tienen.
+
+### Tasa de aprobados de los benchmarks
+
+Una sola serie puede pasar por suerte.  `docs/benchmark_rates.md` repite cada
+proceso sintético en 100 series independientes de 100.000 retornos y cuenta
+cuántas pasan cada hecho.  La fila del modelo usa las 50 semillas de
+`docs/robustness_50.csv`.  El comando es:
+
+```bash
+python scripts/run_benchmark_rates.py --config configs/baseline.json --series 100 --n 100000
+```
+
+| Serie | Curtosis | ACF(retornos, 1) | ACF(abs, 1) | ACF(abs, 50) | Ratio de colas | Los cinco |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| market-sim baseline | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 |
+| Gaussian | 52/100 | 100/100 | 0/100 | 0/100 | 47/100 | 0/100 |
+| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 |
+| GARCH(1,1) | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 |
+
+Con los criterios originales, Gaussian pasa la curtosis en 52 de 100 muestras y
+el ratio de colas en 47 de 100.  Una curtosis muestral mayor que 3 es evidencia
+débil de colas gruesas con este tamaño de muestra.  GARCH pasa los cinco hechos
+en todas las muestras.
+
+Si se endurecen los dos criterios débiles a curtosis mayor que 5 y ratio de
+colas mayor que 10:
+
+| Serie | Curtosis | ACF(retornos, 1) | ACF(abs, 1) | ACF(abs, 50) | Ratio de colas | Los cinco |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| market-sim baseline | 46/50 | 50/50 | 50/50 | 50/50 | 50/50 | 46/50 |
+| Gaussian | 0/100 | 100/100 | 0/100 | 0/100 | 0/100 | 0/100 |
+| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 |
+| GARCH(1,1) | 5/100 | 100/100 | 100/100 | 100/100 | 100/100 | 5/100 |
+
+El modelo pasa los cinco hechos estrictos en 46 de 50 semillas, el 92%.  GARCH
+pasa en 5 de 100, y Gaussian y Student-t en ninguna.  Endurecer los umbrales de
+las colas separa el modelo de los benchmarks.  La tabla principal mantiene los
+umbrales originales porque se fijaron antes de estas ejecuciones.  La debilidad
+de los criterios originales de colas queda documentada como limitación.
 
 ### Precio y volumen
 
@@ -985,6 +1104,29 @@ se queda entre -0.02629 y 0.02405.  El ACF de abs(retornos) en el lag 1 baja
 como mínimo a 0.07257 y en el lag 50 a 0.0577.  La correlación
 volumen-volatilidad baja como mínimo a 0.3977 y el ratio de colas a 12.63.  La
 dirección de los hechos aguanta, la magnitud de las colas no.
+
+### Estabilidad por bloques entre semillas
+
+Una semilla es una sola realización.  `docs/block_ensemble.md` repite el
+análisis de bloques en las 20 semillas de retención, lo que da 200 bloques:
+
+```bash
+python scripts/run_block_ensemble.py --config configs/baseline.json --seeds 1001-1020 --blocks 10 --jobs 8
+```
+
+| Estadística | Bloques que pasan | Tasa |
+| --- | ---: | ---: |
+| Curtosis | 200/200 | 100.0% |
+| ACF(retornos, lag 1) | 199/200 | 99.5% |
+| ACF(abs(retornos), lag 1) | 200/200 | 100.0% |
+| ACF(abs(retornos), lag 50) | 200/200 | 100.0% |
+| corr(volumen, abs(retornos)) | 200/200 | 100.0% |
+| P(abs(r) > 4 sd) / P_normal | 200/200 | 100.0% |
+
+Diecinueve de las 20 semillas pasan las seis estadísticas en los diez bloques.
+El único fallo es la semilla 1020, bloque 10, pasos 90.000 a 100.000.  Su
+autocorrelación de retornos es -0.05138, justo fuera del límite de 0.05.  El
+resto de estadísticas de ese bloque pasa.
 
 ### Rendimiento
 
@@ -1031,9 +1173,12 @@ docker run --rm market-sim version
 - No hay libro de órdenes, dividendos ni noticias.
 - No reproduce el efecto apalancamiento, la asimetría ganancias/pérdidas ni el
   adelanto del volumen.  Los valores están en `docs/additional_facts.md`.
-- Los cinco hechos de precio no son exclusivos del modelo.  Un GARCH(1,1)
-  también pasa 5/5.  El valor añadido es el volumen endógeno y las reglas de
-  los agentes.
+- Los cinco hechos de precio no son exclusivos del modelo con los umbrales
+  originales.  Un GARCH(1,1) también pasa 5/5 en 100/100 muestras.  Los
+  criterios originales de curtosis (>3) y ratio de colas (>1) son débiles: las
+  muestras gaussianas los pasan en torno a la mitad de las veces.  Con curtosis
+  >5 y ratio de colas >10 el modelo pasa 46/50 y GARCH 5/100.  La tabla
+  principal mantiene los umbrales originales porque se fijaron antes.
 - Los umbrales son decisiones explícitas y se pueden cambiar en el fichero de
   configuración.
 
@@ -1059,11 +1204,11 @@ Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
 valores absolutos.  El mapa de parámetros está en `docs/phase_diagram.png`.
 
-La suite tiene 261 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
+La suite tiene 284 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
 que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src`,
 `pytest --cov=market_sim --cov-fail-under=98`, `python scripts/check_docs.py`,
-`python scripts/check_versions.py`, `python scripts/check_results.py` y
-`python scripts/build_api_docs.py --check`.
+`python scripts/check_versions.py`, `python scripts/check_results.py`,
+`python scripts/build_api_docs.py --check` y `python scripts/check_hashes.py`.
 
 ### Licencia
 

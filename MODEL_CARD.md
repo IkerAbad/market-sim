@@ -7,7 +7,7 @@ study whether a small set of behavioural rules can generate five stylized facts
 of return series.  The model is not estimated from market data and is not a
 forecasting system.
 
-- Version: 0.5.0
+- Version: 0.6.0
 - License: MIT
 - Author: Iker Abad
 - Repository: https://github.com/IkerAbad/market-sim
@@ -58,12 +58,13 @@ The five target facts pass under the stated thresholds.  A 20-seed hold-out,
 using seeds not used to choose the parameters, also passes all six statistic
 rows in 20 of 20 seeds.
 
-The analysis is deliberately split into four layers:
+The analysis is deliberately split into five layers:
 
 - the single baseline table in `README.md`,
 - the 20-seed distribution in `docs/robustness.md`,
 - the moving-block bootstrap in `docs/inference.md`,
-- the parameter map in `docs/phase_diagram.md`.
+- the parameter map in `docs/phase_diagram.md`,
+- the block analysis in `docs/stability.md` and `docs/block_ensemble.md`.
 
 An extended 50-seed hold-out in `docs/robustness_50.md` passes all six rows in
 50 of 50 seeds.  The 95% Wilson interval for the all-pass rate is
@@ -72,12 +73,18 @@ An extended 50-seed hold-out in `docs/robustness_50.md` passes all six rows in
 A finite-sample scan passes at 10,000, 50,000, 100,000 and 200,000 steps.  The
 price gap has an AR(1) half-life of 64.6 steps and the volume is heavy-tailed
 and autocorrelated.  These diagnostics are in `docs/sample_size.md` and
-`docs/price_volume.md`.  A GARCH(1,1) benchmark also passes the five price
-facts, so the facts are not unique to the agent-based model.
+`docs/price_volume.md`.  The cross-seed block analysis passes five statistics
+in all 200 blocks and the return autocorrelation in 199 of 200.
 
-Four additional diagnostics are in `docs/additional_facts.md`.  The model
-reproduces the long-memory DFA exponent but not the leverage effect, gain/loss
-asymmetry or volume lead-lag.
+A GARCH(1,1) benchmark also passes the five price facts at the original
+thresholds.  `docs/benchmark_rates.md` repeats the benchmarks over 100 series
+and shows that the original kurtosis and tail-ratio criteria are weak.  With
+kurtosis above 5 and tail ratio above 10 the model passes all five in 46 of 50
+seeds and GARCH in 5 of 100.
+
+Five additional diagnostics are in `docs/additional_facts.md`.  The model
+reproduces the long-memory DFA exponent and aggregational Gaussianity but not
+the leverage effect, gain/loss asymmetry or volume lead-lag.
 
 ## What the ablation shows
 
@@ -90,9 +97,11 @@ The activity process supplies the clustering and the tails.
 This is a limitation of the behavioural interpretation.  The model is a
 three-type market, but its stylized facts are mostly a property of the
 persistent activity state.  A GARCH(1,1) benchmark also passes the five price
-facts, so the five facts do not uniquely identify the agent-based model.  The
-model's additional content is the endogenous volume and the explicit agent
-rules.
+facts at the original thresholds, so the five facts do not uniquely identify
+the agent-based model.  With stricter tail thresholds (kurtosis above 5 and
+tail ratio above 10) the model passes all five in 46/50 seeds and GARCH in
+5/100.  The model's additional content is the endogenous volume and the
+explicit agent rules.
 
 ## Limitations
 
@@ -102,8 +111,10 @@ rules.
   wealth dynamics or chartist herding.
 - The three-type composition is not necessary for the statistical facts.  A
   noise-only ablation passes all six rows.
-- A GARCH(1,1) benchmark also passes the five price facts.  The five facts do
-  not uniquely identify the agent-based model.
+- A GARCH(1,1) benchmark also passes the five price facts at the original
+  thresholds.  The kurtosis and tail-ratio thresholds are weak: Gaussian
+  samples pass them about half of the time.  Stricter tail thresholds separate
+  the model from GARCH, but the main table keeps the original criteria.
 - Chartists are deliberately weak.  Stronger chartists break the near-zero
   return autocorrelation.
 - Volume is gross demand, so the volume-volatility correlation is partly

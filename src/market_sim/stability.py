@@ -62,8 +62,8 @@ def _bounds(length: int, n_blocks: int) -> list[tuple[int, int]]:
 
 
 def block_metrics(
-    returns: Sequence[float],
-    volume: Sequence[float],
+    returns: np.ndarray | Sequence[float],
+    volume: np.ndarray | Sequence[float],
     params: MetricsParams,
     n_blocks: int = 10,
 ) -> list[BlockMetrics]:

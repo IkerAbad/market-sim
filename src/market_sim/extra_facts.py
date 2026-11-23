@@ -14,7 +14,7 @@ from typing import Any
 
 import numpy as np
 
-from .stylized import correlation
+from .stylized import correlation, kurtosis
 
 NumericSeries = np.ndarray | Sequence[float]
 
@@ -128,6 +128,31 @@ def dfa_hurst(series: NumericSeries, scales: Sequence[int] | None = None) -> flo
     return float(slope)
 
 
+def aggregational_kurtosis(
+    returns: NumericSeries, horizons: Sequence[int] = (1, 5, 20, 60)
+) -> dict[int, float]:
+    """Kurtosis of returns aggregated over several horizons.
+
+    Aggregational Gaussianity is the tendency of the kurtosis to fall towards
+    three as the horizon grows.  Each horizon sums disjoint blocks of returns.
+    """
+    r = np.asarray(returns, dtype=float)
+    if r.ndim != 1 or r.size < 4:
+        raise ValueError("returns must be a one-dimensional series of length 4 or more")
+    if not np.all(np.isfinite(r)):
+        raise ValueError("returns contain non-finite values")
+    values: dict[int, float] = {}
+    for horizon in horizons:
+        if horizon < 1:
+            raise ValueError("horizons must be positive")
+        usable = (r.size // horizon) * horizon
+        if usable // horizon < 4:
+            raise ValueError("each horizon needs at least four aggregated returns")
+        aggregated = r[:usable].reshape(-1, horizon).sum(axis=1)
+        values[int(horizon)] = kurtosis(aggregated)
+    return values
+
+
 def volume_volatility_lead_lag(
     returns: NumericSeries,
     volume: NumericSeries,
@@ -178,6 +203,7 @@ def additional_metrics(returns: NumericSeries, volume: NumericSeries) -> dict[st
     asymmetry = gain_loss_asymmetry(r)
     hurst = dfa_hurst(np.abs(r - r.mean()))
     best_lag, best_corr, _ = volume_volatility_lead_lag(r, volume, max_lag=10)
+    aggregation = aggregational_kurtosis(r)
     return {
         "leverage_lag1": leverage,
         "leverage_mean_1_10": float(profile.mean()),
@@ -186,6 +212,10 @@ def additional_metrics(returns: NumericSeries, volume: NumericSeries) -> dict[st
         "dfa_hurst_abs": hurst,
         "volume_volatility_best_lag": best_lag,
         "volume_volatility_best_corr": best_corr,
+        "kurtosis_h1": aggregation[1],
+        "kurtosis_h5": aggregation[5],
+        "kurtosis_h20": aggregation[20],
+        "kurtosis_h60": aggregation[60],
     }
 
 
@@ -193,6 +223,9 @@ def evaluate_additional_facts(
     metrics: dict[str, float | int],
 ) -> list[dict[str, Any]]:
     """Evaluate the additional facts with explicit, arbitrary thresholds."""
+    kurtosis_h1 = float(metrics["kurtosis_h1"])
+    kurtosis_h60 = float(metrics["kurtosis_h60"])
+    aggregation_ratio = kurtosis_h60 / kurtosis_h1 if kurtosis_h1 > 0 else float("nan")
     rows = [
         {
             "fact": "Leverage effect",
@@ -222,6 +255,13 @@ def evaluate_additional_facts(
             "criterion": "> 0",
             "passes": int(metrics["volume_volatility_best_lag"]) > 0,
         },
+        {
+            "fact": "Aggregational Gaussianity",
+            "statistic": "kurtosis(60-step) / kurtosis(1-step)",
+            "value": aggregation_ratio,
+            "criterion": "< 1",
+            "passes": aggregation_ratio < 1.0,
+        },
     ]
     return rows
 
@@ -238,6 +278,15 @@ def format_additional_table(rows: list[dict[str, Any]]) -> str:
         lines.append(
             f"| {row['fact']} | {row['statistic']} | {value} | {row['criterion']} | {passes} |"
         )
+    return "\n".join(lines)
+
+
+def format_aggregational_table(metrics: dict[str, float | int]) -> str:
+    """Render the kurtosis by aggregation horizon as a Markdown table."""
+    lines = ["| Horizon (steps) | Kurtosis |", "| ---: | ---: |"]
+    for horizon in (1, 5, 20, 60):
+        value = float(metrics[f"kurtosis_h{horizon}"])
+        lines.append(f"| {horizon} | {value:.4g} |")
     return "\n".join(lines)
 
 

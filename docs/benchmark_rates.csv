@@ -1,0 +1,5 @@
+series,n_series,kurtosis,acf_return_lag1,acf_abs_return_lag1,acf_abs_return_lag50,tail_exceedance_ratio,all_five
+market-sim baseline,50,50,50,50,50,50,50
+Gaussian,100,52,100,0,0,47,0
+Student-t(5),100,100,100,0,0,100,0
+"GARCH(1,1)",100,100,100,100,100,100,100

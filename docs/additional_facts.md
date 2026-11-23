@@ -7,7 +7,7 @@ python scripts/run_extra_facts.py --results results --report docs/additional_fac
 ```
 
 - Observations: 100000
-- Additional facts passing: 1/4
+- Additional facts passing: 2/5
 
 | Additional fact | Statistic | Value | Criterion | Pass |
 | --- | --- | ---: | --- | :---: |
@@ -15,6 +15,20 @@ python scripts/run_extra_facts.py --results results --report docs/additional_fac
 | Gain/loss asymmetry | std(losses) / std(gains) | 1 | > 1.05 | no |
 | Long memory of abs(returns) | DFA Hurst exponent | 0.8548 | > 0.60 | yes |
 | Volume leads volatility | best lag of corr(volume, abs(return)) | 0 | > 0 | no |
+| Aggregational Gaussianity | kurtosis(60-step) / kurtosis(1-step) | 0.6107 | < 1 | yes |
+
+## Kurtosis by horizon
+
+Returns are summed over disjoint blocks of the given length.  A model
+with aggregational Gaussianity shows a kurtosis that falls towards three
+as the horizon grows.
+
+| Horizon (steps) | Kurtosis |
+| ---: | ---: |
+| 1 | 5.488 |
+| 5 | 5.25 |
+| 20 | 4.916 |
+| 60 | 3.351 |
 
 ## Reading
 
@@ -28,4 +42,6 @@ absolute return.  A negative value is the usual sign.  Gain/loss
 asymmetry compares the volatility of negative and positive returns.
 The DFA exponent measures long-range persistence in absolute returns.
 The volume lead-lag diagnostic finds the lag that maximises
-`corr(volume[t], abs(return[t + lag]))`.
+`corr(volume[t], abs(return[t + lag]))`.  Aggregational Gaussianity
+compares the kurtosis of 60-step returns with the kurtosis of one-step
+returns.

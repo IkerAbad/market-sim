@@ -48,10 +48,12 @@ python scripts/run_sensitivity_full.py --config configs/baseline.json --seeds 10
 python scripts/run_thresholds.py --input docs/robustness.csv --report docs/thresholds.md
 python scripts/run_extra_facts.py --results results --report docs/additional_facts.md
 python scripts/run_benchmarks.py --config configs/baseline.json --results results --report docs/benchmarks.md
+python scripts/run_benchmark_rates.py --config configs/baseline.json --series 100 --n 100000
 python scripts/run_benchmark.py --config configs/baseline.json --steps 10000,50000,100000
 python scripts/run_sample_size.py --config configs/baseline.json --sizes 10000,50000,100000,200000 --seeds 1001-1003 --jobs 8
 python scripts/run_price_volume.py --config configs/baseline.json --results results --report docs/price_volume.md
 python scripts/run_stability.py --config configs/baseline.json --results results --blocks 10
+python scripts/run_block_ensemble.py --config configs/baseline.json --seeds 1001-1020 --blocks 10 --jobs 8
 ```
 
 To run every analysis in order:
@@ -104,18 +106,22 @@ installs the built wheel in a clean environment.
 | `docs/phase_diagram.png` | `3FBB77D71FC4E9CBB4B24DEADA1637B1271291D690AC8815A66F3D8E478B7F71` |
 | `docs/robustness.csv` | `9D485D761E597482BB161781BB640CB34C81C7171C583234EF2AA88633DCF664` |
 | `docs/inference.csv` | `97B7205A955BE6AC2549E54EEEFF6223336814328F4A76D3B8EBEBE351EE3ED1` |
-| `docs/additional_facts.csv` | `FFF87CB35D445038BFBBC8CD75885571D5FA9CDFD82BDD1797A0397127523BD6` |
+| `docs/additional_facts.csv` | `1B0D97DCD0BCC8FA8FF0C0E582BF46AB783A34133365E84BA01E722F7F30B514` |
 | `docs/phase_diagram.csv` | `B8129AC6314E1B5FEA6E88F6B90521A70D374964241506D7C5F8E7ACBB6EF7E7` |
 | `docs/robustness_50.csv` | `E597B0FAE0051ADEBD2DC9BE8FE85765B124FAD443678627742E54A4C2C52702` |
 | `docs/ablations.csv` | `C9E6EC1C3F1A6BA8BC4661851B276D3F4E68477F700281468DC8B5D00E7DE533` |
 | `docs/sensitivity_full.csv` | `3F3D8AE751317CF422DDFE7139BFE87668DE8157A9ACFA03A1A760635DACE18B` |
 | `docs/thresholds.csv` | `18F8BF5F55FBBF68D5605D04AA1D6AB25DBD30FFA0E60FB6A5EDC7D831E80153` |
 | `docs/benchmarks.csv` | `4DD42A024FF55C7E24FCEFF9C8F994E6CEC622A4AE1D69C5AB1EE07FE0FA3E3B` |
+| `docs/benchmark_rates.csv` | `DEE83E03513203F07962B1A9853508DC4A23CCD6B390374D8CF91211D10EFE80` |
 | `docs/performance.csv` | `A1B4533529576001C410697F8ED15A5C37942C493E97603F3E44A58878265591` |
 | `docs/sample_size.csv` | `F319DDDAB1ADC1B5E85359960C29B88D65FE2FDEE51877DC8EDE11669EDE57B8` |
 | `docs/price_volume.csv` | `6948769BC613DEC23C717ED13BD6758376FD1D362848649F7DB374AF3FFB7602` |
 | `docs/stability.csv` | `63766A0C0219BAB3BAB9E378480169C915D732581F2DE2CEFBADDDEC57245FF3` |
+| `docs/block_ensemble.csv` | `689BAB653433F20A92446BE18025405EABFCBDBDD32F1D5A5642098B67CE05C3` |
 | `docs/baseline_metrics.json` | `31F33A81C8465CFC2606B8FF300A8151DF4421594CB7C936AA09A3C544020DE5` |
 
 The three baseline figures are byte-identical when regenerated in the reference
 environment.  The hash table is a check, not a substitute for the commands.
+`scripts/check_hashes.py` also fails when a CSV, JSON or PNG file under `docs/`
+has no row in the table.

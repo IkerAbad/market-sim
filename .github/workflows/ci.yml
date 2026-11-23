@@ -31,6 +31,8 @@ jobs:
         run: python scripts/check_results.py
       - name: API reference
         run: python scripts/build_api_docs.py --check
+      - name: Output hashes
+        run: python scripts/check_hashes.py
 
   test:
     name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
@@ -138,3 +140,13 @@ jobs:
           python scripts/run_stability.py --results results --blocks 10 --report /tmp/stability.md --csv /tmp/stability.csv
           test -s /tmp/stability.md
           test -s /tmp/stability.csv
+      - name: Block stability across seeds
+        run: |
+          python scripts/run_block_ensemble.py --seeds 1-2 --blocks 10 --jobs 2 --report /tmp/block_ensemble.md --csv /tmp/block_ensemble.csv
+          test -s /tmp/block_ensemble.md
+          test -s /tmp/block_ensemble.csv
+      - name: Benchmark pass rates
+        run: |
+          python scripts/run_benchmark_rates.py --series 10 --n 20000 --report /tmp/benchmark_rates.md --csv /tmp/benchmark_rates.csv
+          test -s /tmp/benchmark_rates.md
+          test -s /tmp/benchmark_rates.csv

@@ -3,7 +3,7 @@
 Command:
 
 ```
-python scripts/run_benchmarks.py --config configs/baseline.json --results results --n 100000
+python scripts/run_benchmarks.py --config C:/dev/market-sim/configs/baseline.json --results C:/dev/market-sim/results --n 100000
 ```
 
 - Observations per series: 100000
@@ -26,4 +26,5 @@ the five price facts in this sample.  The five facts alone therefore do
 not distinguish the agent-based model from a simple stochastic-volatility
 benchmark.  The model's additional content is the endogenous volume and
 the explicit agent rules.  The volume fact is not in this table because
-the benchmarks have no volume.
+the benchmarks have no volume.  The pass rates over 100 series per
+process are in `docs/benchmark_rates.md`.
