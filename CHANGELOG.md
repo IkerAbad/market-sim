@@ -19,13 +19,13 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 - README table checker `scripts/check_readme.py`.  Every results table in the
   README is compared with its generated report.
 - Stable result hash helper `scripts/result_hash.py`.
-- Distribution published on PyPI as `market-sim==1.0.0` and container image
-  `ghcr.io/ikerabad/market-sim:1.0.0`.
+- Distribution published on PyPI as `market-sim==1.0.0` and a compressed
+  container image attached to the GitHub release.
 
 ### Changed
 
 - Version 1.0.0 freezes the model.  No parameter or process is added.
-- The suite has 334 tests and 99% branch coverage.
+- The suite has 338 tests and 99% branch coverage.
 
 ## [0.9.0] - 2026-11-23
 

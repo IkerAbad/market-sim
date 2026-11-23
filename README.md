@@ -854,7 +854,7 @@ the model.  The data are not committed.
 python -m pytest
 ```
 
-The suite has 334 tests and 99% branch coverage:
+The suite has 338 tests and 99% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
   population, the simulated series and the committed baseline summary,
@@ -928,19 +928,20 @@ python scripts/run_benchmark.py --config configs/baseline.json --steps 10000,500
 Pushing a `v*` tag triggers `.github/workflows/release.yml`.  The workflow
 builds the sdist and wheel, runs `twine check`, publishes the distribution to
 PyPI with trusted publishing, extracts the matching section from `CHANGELOG.md`,
-creates the GitHub release with both artifacts and publishes the container to
-GitHub Container Registry.  The version in `pyproject.toml`, `CITATION.cff` and
-`src/market_sim/__init__.py` must match the tag.
+creates the GitHub release with both artifacts and attaches a compressed
+container image to the release.  The version in `pyproject.toml`,
+`CITATION.cff` and `src/market_sim/__init__.py` must match the tag.
 
 ## Container
 
 The repository ships a `Dockerfile` with the package and the baseline
-configuration.  The release image is published to GitHub Container Registry:
+configuration.  The release attaches a compressed image to the GitHub release:
 
 ```bash
-docker pull ghcr.io/ikerabad/market-sim:1.0.0
-docker run --rm ghcr.io/ikerabad/market-sim:1.0.0 version
-docker run --rm ghcr.io/ikerabad/market-sim:1.0.0 simulate --config configs/baseline.json --output /tmp/results
+gh release download v1.0.0 --pattern "market-sim-1.0.0-container.tar.gz"
+docker load < market-sim-1.0.0-container.tar.gz
+docker run --rm market-sim:1.0.0 version
+docker run --rm market-sim:1.0.0 simulate --config configs/baseline.json --output /tmp/results
 ```
 
 To build it locally:
@@ -1398,11 +1399,12 @@ el modelo.  Los datos no se suben al repositorio.
 
 ### Contenedor
 
-La imagen de la release se publica en GitHub Container Registry:
+La release adjunta una imagen comprimida.  Para cargarla:
 
 ```bash
-docker pull ghcr.io/ikerabad/market-sim:1.0.0
-docker run --rm ghcr.io/ikerabad/market-sim:1.0.0 version
+gh release download v1.0.0 --pattern "market-sim-1.0.0-container.tar.gz"
+docker load < market-sim-1.0.0-container.tar.gz
+docker run --rm market-sim:1.0.0 version
 ```
 
 Para construirla en local:
@@ -1460,7 +1462,7 @@ Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
 valores absolutos.  El mapa de parámetros está en `docs/phase_diagram.png`.
 
-La suite tiene 334 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
+La suite tiene 338 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
 que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src`,
 `pytest --cov=market_sim --cov-fail-under=98`, `python scripts/check_docs.py`,
 `python scripts/check_versions.py`, `python scripts/check_results.py`,

@@ -57,3 +57,9 @@ def test_metric_formatting_does_not_change_the_hash(tmp_path) -> None:
     first = make_results(tmp_path / "first", metrics='{"a": 1.0, "b": 2.0}\n')
     second = make_results(tmp_path / "second", metrics='{"b": 2.0, "a": 1.0}\n')
     assert canonical_metrics_hash(first) == canonical_metrics_hash(second)
+
+
+def test_nested_values_are_canonical(tmp_path) -> None:
+    metrics = '{"a": [1.0000001, 2.0, true, "x"], "b": 3}\n'
+    results = make_results(tmp_path, metrics=metrics)
+    assert len(canonical_metrics_hash(results)) == 64

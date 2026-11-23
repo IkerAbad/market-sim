@@ -77,6 +77,16 @@ is not part of the committed outputs because the data are not packaged.
 
 ## Container
 
+The release attaches a compressed image.  To load it:
+
+```bash
+gh release download v1.0.0 --pattern "market-sim-1.0.0-container.tar.gz"
+docker load < market-sim-1.0.0-container.tar.gz
+docker run --rm market-sim:1.0.0 version
+```
+
+To build it locally:
+
 ```bash
 docker build -t market-sim .
 docker run --rm market-sim version
