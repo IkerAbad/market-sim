@@ -11,6 +11,8 @@ ROW_PATTERN = re.compile(
     re.MULTILINE,
 )
 
+TEXT_SUFFIXES = {".csv", ".json", ".md", ".txt"}
+
 
 def parse_hash_table(text: str) -> list[tuple[str, str]]:
     """Return ``(path, sha256)`` pairs from the Markdown hash table."""
@@ -18,12 +20,15 @@ def parse_hash_table(text: str) -> list[tuple[str, str]]:
 
 
 def sha256_file(path: Path) -> str:
-    """Return the uppercase SHA256 digest of a file."""
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return digest.hexdigest().upper()
+    """Return the uppercase SHA256 digest of a file.
+
+    Text files are hashed with LF line endings so the digest does not depend
+    on the checkout platform.  Binary files are hashed as they are.
+    """
+    data = path.read_bytes()
+    if path.suffix.lower() in TEXT_SUFFIXES:
+        data = data.replace(b"\r\n", b"\n")
+    return hashlib.sha256(data).hexdigest().upper()
 
 
 def check_hashes(root: Path) -> list[str]:

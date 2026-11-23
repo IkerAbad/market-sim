@@ -6,6 +6,17 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-23
+
+### Fixed
+
+- Output hashes normalise CRLF line endings before hashing text files, so
+  `scripts/check_hashes.py` passes on Linux, Windows and macOS checkouts.
+
+### Changed
+
+- The suite has 285 tests and 99% branch coverage.
+
 ## [0.6.0] - 2026-11-23
 
 ### Added

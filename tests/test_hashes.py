@@ -38,6 +38,14 @@ def test_missing_file_is_reported(tmp_path) -> None:
     assert any("missing" in error for error in errors)
 
 
+def test_crlf_and_lf_hash_the_same(tmp_path) -> None:
+    lf = tmp_path / "lf.csv"
+    crlf = tmp_path / "crlf.csv"
+    lf.write_bytes(b"a,b\n1,2\n")
+    crlf.write_bytes(b"a,b\r\n1,2\r\n")
+    assert sha256_file(lf) == sha256_file(crlf)
+
+
 def test_unlisted_file_is_reported(tmp_path) -> None:
     (tmp_path / "docs").mkdir()
     (tmp_path / "docs" / "a.csv").write_text("x\n", encoding="utf-8")

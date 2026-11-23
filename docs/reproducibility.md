@@ -119,8 +119,7 @@ installs the built wheel in a clean environment.
 | `docs/price_volume.csv` | `6948769BC613DEC23C717ED13BD6758376FD1D362848649F7DB374AF3FFB7602` |
 | `docs/stability.csv` | `63766A0C0219BAB3BAB9E378480169C915D732581F2DE2CEFBADDDEC57245FF3` |
 | `docs/block_ensemble.csv` | `689BAB653433F20A92446BE18025405EABFCBDBDD32F1D5A5642098B67CE05C3` |
-| `docs/baseline_metrics.json` | `31F33A81C8465CFC2606B8FF300A8151DF4421594CB7C936AA09A3C544020DE5` |
-
+| `docs/baseline_metrics.json` | `42E05713819A76DB948653409C98C68DFFBB520A2E555442870717FB2709AF32` |
 The three baseline figures are byte-identical when regenerated in the reference
 environment.  The hash table is a check, not a substitute for the commands.
 `scripts/check_hashes.py` also fails when a CSV, JSON or PNG file under `docs/`

@@ -739,7 +739,7 @@ the model.  The data are not committed.
 python -m pytest
 ```
 
-The suite has 284 tests and 99% branch coverage:
+The suite has 285 tests and 99% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
   population and the simulated series,
@@ -1204,7 +1204,7 @@ Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
 valores absolutos.  El mapa de parámetros está en `docs/phase_diagram.png`.
 
-La suite tiene 284 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
+La suite tiene 285 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
 que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src`,
 `pytest --cov=market_sim --cov-fail-under=98`, `python scripts/check_docs.py`,
 `python scripts/check_versions.py`, `python scripts/check_results.py`,
