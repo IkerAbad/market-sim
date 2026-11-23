@@ -72,3 +72,11 @@ def test_series_are_rounded_before_hashing(tmp_path) -> None:
     assert result_hashes(first)["series"] == result_hashes(second)["series"]
     assert result_hashes(first)["series"] != result_hashes(third)["series"]
     assert result_hashes(first)["raw_series"] != result_hashes(second)["raw_series"]
+
+
+def test_non_numeric_series_values_are_kept(tmp_path) -> None:
+    results = make_results(
+        tmp_path,
+        series="step,price,note\n1,100.0000001,hello\n",
+    )
+    assert len(result_hashes(results)["series"]) == 64

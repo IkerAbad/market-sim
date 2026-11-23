@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
@@ -146,6 +147,16 @@ def config_from_dict(data: Mapping[str, Any]) -> SimulationConfig:
 def load_config(path: str | Path) -> SimulationConfig:
     """Load a JSON configuration file."""
     with Path(path).open("r", encoding="utf-8") as handle:
+        data = json.load(handle)
+    if not isinstance(data, dict):
+        raise TypeError("the configuration root must be a JSON object")
+    return config_from_dict(data)
+
+
+def load_default_config() -> SimulationConfig:
+    """Load the baseline configuration packaged with the distribution."""
+    resource = files("market_sim").joinpath("data", "baseline.json")
+    with resource.open("r", encoding="utf-8") as handle:
         data = json.load(handle)
     if not isinstance(data, dict):
         raise TypeError("the configuration root must be a JSON object")

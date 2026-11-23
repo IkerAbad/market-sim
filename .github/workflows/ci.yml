@@ -161,6 +161,11 @@ jobs:
         run: |
           cd /tmp
           python -c "from market_sim import MetricsParams, ModelParams, SimulationConfig, compute_metrics, simulate; c = SimulationConfig(seed=1, n_steps=2000, burn_in=100, model=ModelParams(n_agents=40), metrics=MetricsParams(acf_lags=50)); r = simulate(c); print(compute_metrics(*r.analysis_window(), c.metrics)['kurtosis'])"
+          python -c "from market_sim import load_default_config; c = load_default_config(); assert c.seed == 20261122; assert c.model.n_agents == 200; print('packaged config ok')"
+      - name: Installed baseline
+        run: |
+          cd /tmp
+          python "$GITHUB_WORKSPACE/scripts/verify_installed.py"
 
   container:
     name: container smoke test

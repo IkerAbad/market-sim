@@ -59,7 +59,7 @@ market-sim = "market_sim.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-market_sim = ["py.typed"]
+market_sim = ["py.typed", "data/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

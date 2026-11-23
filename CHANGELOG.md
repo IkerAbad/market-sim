@@ -19,13 +19,16 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 - README table checker `scripts/check_readme.py`.  Every results table in the
   README is compared with its generated report.
 - Stable result hash helper `scripts/result_hash.py`.
+- The baseline configuration is packaged as `market_sim/data/baseline.json`.
+  `load_default_config()` reads it, so the installed package reproduces the
+  published baseline without the repository.
 - Release workflow publishes to PyPI with trusted publishing and attaches a
   compressed container image to the GitHub release.
 
 ### Changed
 
 - Version 1.0.0 freezes the model.  No parameter or process is added.
-- The suite has 338 tests and 99% branch coverage.
+- The suite has 342 tests and 99% branch coverage.
 
 ## [0.9.0] - 2026-11-23
 

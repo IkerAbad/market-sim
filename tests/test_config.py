@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import io
 import json
 from pathlib import Path
 
@@ -13,9 +14,30 @@ from market_sim.config import (
     config_from_dict,
     config_to_dict,
     load_config,
+    load_default_config,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_load_default_config_rejects_non_object(monkeypatch) -> None:
+    class FakeResource:
+        def open(self, *args, **kwargs):
+            return io.StringIO("[]")
+
+    class FakeRoot:
+        def joinpath(self, *parts):
+            return FakeResource()
+
+    monkeypatch.setattr("market_sim.config.files", lambda package: FakeRoot())
+    with pytest.raises(TypeError):
+        load_default_config()
+
+
+def test_packaged_config_matches_repository() -> None:
+    packaged = load_default_config()
+    repository = load_config(ROOT / "configs" / "baseline.json")
+    assert config_to_dict(packaged) == config_to_dict(repository)
 
 
 def test_load_baseline_config() -> None:

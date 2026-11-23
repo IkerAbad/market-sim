@@ -1,5 +1,7 @@
 # market-sim
 
+[![PyPI](https://img.shields.io/pypi/v/market-sim.svg)](https://pypi.org/project/market-sim/)
+
 A reproducible agent-based toy market with fundamentalists, chartists and noise
 traders.  The repository measures five stylized facts of financial returns with
 explicit statistics instead of asserting them in prose.
@@ -12,6 +14,24 @@ two of them.  An ablation study shows that the six statistic rows come from
 the persistent activity process, not from the three agent types.  A noise-only
 version passes all of them.  The types shape the price level and the return
 autocorrelation.  See `docs/ablations.md`.
+
+## Install
+
+```bash
+pip install market-sim==1.0.0
+```
+
+The baseline configuration is packaged with the distribution, so the published
+result does not need the repository:
+
+```python
+from market_sim import compute_metrics, load_default_config, simulate
+
+config = load_default_config()
+result = simulate(config)
+metrics = compute_metrics(*result.analysis_window(), config.metrics)
+print(metrics["kurtosis"])
+```
 
 ## Model
 
@@ -854,7 +874,7 @@ the model.  The data are not committed.
 python -m pytest
 ```
 
-The suite has 338 tests and 99% branch coverage:
+The suite has 342 tests and 99% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
   population, the simulated series and the committed baseline summary,
@@ -964,6 +984,24 @@ Citation metadata is in `CITATION.cff`.  Release notes are in `CHANGELOG.md`.
 Contributor setup is in `CONTRIBUTING.md`.
 
 ## Español
+
+[![PyPI](https://img.shields.io/pypi/v/market-sim.svg)](https://pypi.org/project/market-sim/)
+
+```bash
+pip install market-sim==1.0.0
+```
+
+La configuración base viaja dentro del paquete.  No hace falta el repositorio
+para reproducir la tabla publicada:
+
+```python
+from market_sim import compute_metrics, load_default_config, simulate
+
+config = load_default_config()
+result = simulate(config)
+metrics = compute_metrics(*result.analysis_window(), config.metrics)
+print(metrics["kurtosis"])
+```
 
 Todas las tablas de esta sección se regeneran con
 `python scripts/reproduce_all.py --jobs 8`.  Los comandos individuales de los
@@ -1462,7 +1500,7 @@ Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
 valores absolutos.  El mapa de parámetros está en `docs/phase_diagram.png`.
 
-La suite tiene 338 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
+La suite tiene 342 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
 que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src`,
 `pytest --cov=market_sim --cov-fail-under=98`, `python scripts/check_docs.py`,
 `python scripts/check_versions.py`, `python scripts/check_results.py`,

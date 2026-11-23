@@ -63,6 +63,7 @@ from .config import (
     config_from_dict,
     config_to_dict,
     load_config,
+    load_default_config,
 )
 from .discrimination import (
     DiscriminationRow,
@@ -258,6 +259,7 @@ __all__ = [
     "kurtosis",
     "leverage_effect",
     "load_config",
+    "load_default_config",
     "load_metrics_csv",
     "load_returns_csv",
     "load_seed_metrics",
