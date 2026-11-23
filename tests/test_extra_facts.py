@@ -15,6 +15,7 @@ from market_sim.extra_facts import (
     gain_loss_asymmetry,
     leverage_effect,
     leverage_profile,
+    non_volume_metrics,
     volume_volatility_lead_lag,
     write_additional_csv,
 )
@@ -157,6 +158,27 @@ def test_additional_metrics_keys() -> None:
         "kurtosis_h60",
     }
     assert all(np.isfinite(float(value)) for value in metrics.values())
+
+
+def test_non_volume_metrics() -> None:
+    rng = np.random.default_rng(4)
+    returns = rng.standard_t(df=4, size=10000)
+    metrics = non_volume_metrics(returns)
+    assert set(metrics) == {
+        "leverage_lag1",
+        "gain_loss_volatility_ratio",
+        "dfa_hurst_abs",
+        "aggregational_ratio",
+    }
+    assert all(np.isfinite(value) for value in metrics.values())
+    with pytest.raises(ValueError):
+        non_volume_metrics(np.arange(10.0))
+    with pytest.raises(ValueError):
+        non_volume_metrics(np.arange(100.0).reshape(10, 10))
+    bad = returns.copy()
+    bad[0] = np.nan
+    with pytest.raises(ValueError):
+        non_volume_metrics(bad)
 
 
 def test_aggregational_kurtosis() -> None:

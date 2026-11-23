@@ -26,6 +26,7 @@ def test_full_commands_cover_the_scripts() -> None:
         "run_strict_criteria.py",
         "run_null_distribution.py",
         "run_discrimination.py",
+        "run_additional_discrimination.py",
         "run_benchmark.py",
         "run_sample_size.py",
         "run_price_volume.py",

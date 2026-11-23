@@ -6,6 +6,23 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-23
+
+### Added
+
+- Additional facts against the benchmarks in
+  `docs/additional_discrimination.md`.  DFA Hurst separates the model from
+  GARCH with AUC 0.998, aggregational Gaussianity with 0.804, while leverage
+  and gain/loss asymmetry do not separate the two.
+- Bootstrap 95% percentile intervals for the discrimination AUCs in
+  `docs/discrimination.md`.  The ACF(abs, 1) interval contains 0.5.
+- `non_volume_metrics` helper for the four additional facts that do not need a
+  volume series.
+
+### Changed
+
+- The suite has 320 tests and 99% branch coverage.
+
 ## [0.8.0] - 2026-11-23
 
 ### Added

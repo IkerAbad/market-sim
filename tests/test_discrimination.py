@@ -8,6 +8,7 @@ from market_sim.config import MetricsParams
 from market_sim.discrimination import (
     FACT_DIRECTIONS,
     auc,
+    bootstrap_auc_interval,
     discrimination_rows,
     format_discrimination_markdown,
     format_grid_markdown,
@@ -44,6 +45,20 @@ def test_auc() -> None:
         auc([], [1.0])
 
 
+def test_bootstrap_auc_interval() -> None:
+    lower, upper = bootstrap_auc_interval(
+        [2.0, 3.0, 4.0],
+        [1.0, 2.0, 3.0],
+        higher_is_better=True,
+        n_resamples=50,
+    )
+    assert 0.0 <= lower <= upper <= 1.0
+    with pytest.raises(ValueError):
+        bootstrap_auc_interval([1.0], [1.0], n_resamples=0)
+    with pytest.raises(ValueError):
+        bootstrap_auc_interval([], [1.0])
+
+
 def test_discrimination_rows() -> None:
     model = [make_row(6.0), make_row(7.0)]
     garch = [make_row(4.0), make_row(4.5)]
@@ -53,6 +68,7 @@ def test_discrimination_rows() -> None:
     kurtosis = next(row for row in rows if row.key == "kurtosis")
     assert kurtosis.auc_garch == 1.0
     assert kurtosis.auc_gaussian == 1.0
+    assert kurtosis.auc_garch_lower <= kurtosis.auc_garch <= kurtosis.auc_garch_upper
     assert kurtosis.model_median == pytest.approx(6.5)
     with pytest.raises(ValueError):
         discrimination_rows([], garch, gaussian)

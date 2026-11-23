@@ -44,6 +44,14 @@ Volume is gross demand and the return is proportional to net demand.  Both are
 driven by the same demands, so a positive correlation is built into the
 accounting.  See [the main results](../README.md#reading-the-table).
 
+## Does the model produce the leverage effect?
+
+No.  The baseline leverage correlation is -0.00096, essentially zero, and the
+20-seed median in `docs/additional_discrimination.md` is slightly positive,
+0.00426.  GARCH is also symmetric, with -0.00083.  The AUC against GARCH is
+0.298, so leverage does not separate the two and the model does not reproduce
+the usual negative sign.  This is a limitation of the symmetric demand rules.
+
 ## Which fact distinguishes the model from GARCH?
 
 The slow clustering fact.  `docs/discrimination.md` reports an AUC of 0.989 for

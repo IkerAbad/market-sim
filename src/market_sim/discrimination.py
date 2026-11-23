@@ -39,7 +39,11 @@ class DiscriminationRow:
     garch_median: float
     gaussian_median: float
     auc_garch: float
+    auc_garch_lower: float
+    auc_garch_upper: float
     auc_gaussian: float
+    auc_gaussian_lower: float
+    auc_gaussian_upper: float
 
 
 @dataclass(frozen=True)
@@ -80,14 +84,39 @@ def auc(
     right = np.asarray(benchmark, dtype=float)
     if left.size == 0 or right.size == 0:
         raise ValueError("both samples must be non-empty")
-    wins = 0.0
-    for left_value in left:
-        for right_value in right:
-            if left_value == right_value:
-                wins += 0.5
-            elif (left_value > right_value) == higher_is_better:
-                wins += 1.0
+    left_grid = left[:, None]
+    right_grid = right[None, :]
+    greater = left_grid > right_grid
+    equal = left_grid == right_grid
+    if higher_is_better:
+        wins = float(greater.sum()) + 0.5 * float(equal.sum())
+    else:
+        wins = float((~greater & ~equal).sum()) + 0.5 * float(equal.sum())
     return wins / (left.size * right.size)
+
+
+def bootstrap_auc_interval(
+    model: np.ndarray | Sequence[float],
+    benchmark: np.ndarray | Sequence[float],
+    higher_is_better: bool = True,
+    n_resamples: int = 1000,
+    seed: int = 123,
+) -> tuple[float, float]:
+    """Percentile bootstrap interval for the AUC."""
+    if n_resamples < 1:
+        raise ValueError("n_resamples must be positive")
+    left = np.asarray(model, dtype=float)
+    right = np.asarray(benchmark, dtype=float)
+    if left.size == 0 or right.size == 0:
+        raise ValueError("both samples must be non-empty")
+    rng = np.random.default_rng(seed)
+    values = np.empty(n_resamples, dtype=float)
+    for index in range(n_resamples):
+        left_sample = rng.choice(left, size=left.size, replace=True)
+        right_sample = rng.choice(right, size=right.size, replace=True)
+        values[index] = auc(left_sample, right_sample, higher_is_better)
+    lower, upper = np.quantile(values, [0.025, 0.975])
+    return float(lower), float(upper)
 
 
 def discrimination_rows(
@@ -107,6 +136,12 @@ def discrimination_rows(
         model_transformed, higher = _transform(model_values, direction)
         garch_transformed, _ = _transform(garch_values, direction)
         gaussian_transformed, _ = _transform(gaussian_values, direction)
+        garch_lower, garch_upper = bootstrap_auc_interval(
+            model_transformed, garch_transformed, higher
+        )
+        gaussian_lower, gaussian_upper = bootstrap_auc_interval(
+            model_transformed, gaussian_transformed, higher
+        )
         rows.append(
             DiscriminationRow(
                 key=key,
@@ -116,7 +151,11 @@ def discrimination_rows(
                 garch_median=float(np.median(garch_values)),
                 gaussian_median=float(np.median(gaussian_values)),
                 auc_garch=auc(model_transformed, garch_transformed, higher),
+                auc_garch_lower=garch_lower,
+                auc_garch_upper=garch_upper,
                 auc_gaussian=auc(model_transformed, gaussian_transformed, higher),
+                auc_gaussian_lower=gaussian_lower,
+                auc_gaussian_upper=gaussian_upper,
             )
         )
     return tuple(rows)
@@ -175,7 +214,9 @@ def format_discrimination_markdown(rows: Sequence[DiscriminationRow]) -> str:
     for row in rows:
         lines.append(
             f"| {row.label} | {row.model_median:.4g} | {row.garch_median:.4g} | "
-            f"{row.gaussian_median:.4g} | {row.auc_garch:.3f} | {row.auc_gaussian:.3f} |"
+            f"{row.gaussian_median:.4g} | "
+            f"{row.auc_garch:.3f} [{row.auc_garch_lower:.2f}, {row.auc_garch_upper:.2f}] | "
+            f"{row.auc_gaussian:.3f} [{row.auc_gaussian_lower:.2f}, {row.auc_gaussian_upper:.2f}] |"
         )
     return "\n".join(lines)
 
@@ -209,7 +250,11 @@ def write_discrimination_csv(rows: Sequence[DiscriminationRow], path: str | Path
                 "garch_median",
                 "gaussian_median",
                 "auc_garch",
+                "auc_garch_lower",
+                "auc_garch_upper",
                 "auc_gaussian",
+                "auc_gaussian_lower",
+                "auc_gaussian_upper",
             ]
         )
         for row in rows:
@@ -220,7 +265,11 @@ def write_discrimination_csv(rows: Sequence[DiscriminationRow], path: str | Path
                     f"{row.garch_median:.10g}",
                     f"{row.gaussian_median:.10g}",
                     f"{row.auc_garch:.6f}",
+                    f"{row.auc_garch_lower:.6f}",
+                    f"{row.auc_garch_upper:.6f}",
                     f"{row.auc_gaussian:.6f}",
+                    f"{row.auc_gaussian_lower:.6f}",
+                    f"{row.auc_gaussian_upper:.6f}",
                 ]
             )
     return output

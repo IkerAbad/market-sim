@@ -192,9 +192,10 @@ NumPy 2.5.5, Matplotlib 3.11.2, Windows 11.  CI runs Python 3.12, 3.13 and
 `scripts/reproduce_all.py` runs the baseline, the figures, the ensembles, the
 bootstrap, the phase map, the ablations, the sensitivity, the thresholds, the
 additional facts, the benchmarks, the benchmark pass rates, the strict hold-out
-table, the Gaussian null distribution, the discrimination grid, the performance
-timing, the sample-size scan, the price-volume diagnostics, the block-stability
-table and the cross-seed block table in order:
+table, the Gaussian null distribution, the discrimination grid, the additional
+facts against the benchmarks, the performance timing, the sample-size scan, the
+price-volume diagnostics, the block-stability table and the cross-seed block
+table in order:
 
 ```bash
 python scripts/reproduce_all.py --dry-run
@@ -672,16 +673,17 @@ python scripts/run_discrimination.py --config configs/baseline.json --series 100
 
 | Statistic | Model median | GARCH median | Gaussian median | AUC vs GARCH | AUC vs Gaussian |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Kurtosis | 6.304 | 4.28 | 3 | 0.962 | 1.000 |
-| ACF(returns, 1) | -0.003142 | 0.000766 | 0.0002724 | 0.426 | 0.351 |
-| ACF(abs, 1) | 0.169 | 0.1674 | -2.617e-05 | 0.517 | 1.000 |
-| ACF(abs, 50) | 0.1126 | 0.05986 | -3.298e-05 | 0.989 | 1.000 |
-| Tail ratio | 44.36 | 25.73 | 0.9472 | 0.985 | 1.000 |
+| Kurtosis | 6.304 | 4.28 | 3 | 0.962 [0.93, 0.99] | 1.000 [1.00, 1.00] |
+| ACF(returns, 1) | -0.003142 | 0.000766 | 0.0002724 | 0.426 [0.33, 0.54] | 0.351 [0.25, 0.45] |
+| ACF(abs, 1) | 0.169 | 0.1674 | -2.617e-05 | 0.517 [0.40, 0.63] | 1.000 [1.00, 1.00] |
+| ACF(abs, 50) | 0.1126 | 0.05986 | -3.298e-05 | 0.989 [0.97, 1.00] | 1.000 [1.00, 1.00] |
+| Tail ratio | 44.36 | 25.73 | 0.9472 | 0.985 [0.97, 1.00] | 1.000 [1.00, 1.00] |
 
-Kurtosis separates the model from GARCH with AUC 0.962.  ACF(abs, 50) is
-stronger, with 0.989.  ACF(abs, 1) is close to a coin flip at 0.517, so the
-fast clustering fact does not distinguish the two models.  The slow
-autocorrelation is the stronger discriminator.
+The brackets are 95% bootstrap percentile intervals.  Kurtosis separates the
+model from GARCH with AUC 0.962.  ACF(abs, 50) is stronger, with 0.989.
+ACF(abs, 1) is close to a coin flip at 0.517, and its interval [0.40, 0.63]
+contains 0.5, so the fast clustering fact does not distinguish the two models.
+The slow autocorrelation is the stronger discriminator.
 
 The threshold grid in the same report shows the separation region.  At
 kurtosis > 4 and tail ratio > 10 the model passes all five in 50/50 seeds and
@@ -691,6 +693,34 @@ GARCH in 93/100.  At kurtosis > 5 the model passes 46/50 and GARCH falls to
 their difference over the full grid.
 
 ![Discrimination grid](docs/discrimination.png)
+
+## Additional facts against the benchmarks
+
+The five price facts are not the whole portfolio.  `docs/additional_discrimination.md`
+compares the model, GARCH and Gaussian on the four additional facts that do not
+need volume.  The volume lead-lag fact is omitted because the benchmarks have no
+volume.  The command is:
+
+```bash
+python scripts/run_additional_discrimination.py --config configs/baseline.json --seeds 1001-1020 --series 100 --n 100000 --jobs 8
+```
+
+| Additional fact | Model median | GARCH median | Gaussian median | AUC vs GARCH | AUC vs Gaussian |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Leverage effect | 0.00426 | -0.0008269 | 0.0005386 | 0.298 | 0.352 |
+| Gain/loss asymmetry | 0.9931 | 0.9992 | 0.9985 | 0.391 | 0.378 |
+| DFA Hurst exponent | 0.8592 | 0.7378 | 0.5004 | 0.998 | 1.000 |
+| Aggregational ratio | 0.7545 | 1.002 | 0.9977 | 0.804 | 0.840 |
+
+DFA Hurst separates the model from GARCH with AUC 0.998.  Aggregational
+Gaussianity separates them moderately, with 0.804: the model ratio is 0.755 and
+the GARCH ratio is 1.002.  Leverage does not separate them in the intended
+direction.  Its AUC is 0.298, and the model median is slightly positive,
+0.00426, against -0.00083 for GARCH.  Gain/loss asymmetry is close to a coin
+flip, with 0.391 and both medians near 1.  The additional facts add the DFA
+exponent and aggregational Gaussianity to the discriminators.  Leverage and
+gain/loss do not help.  The DFA exponent and ACF(abs, 50) are two views of the
+same slow persistence.
 
 ## Price and volume
 
@@ -823,7 +853,7 @@ the model.  The data are not committed.
 python -m pytest
 ```
 
-The suite has 312 tests and 99% branch coverage:
+The suite has 320 tests and 99% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
   population, the simulated series and the committed baseline summary,
@@ -1231,16 +1261,17 @@ python scripts/run_discrimination.py --config configs/baseline.json --series 100
 
 | Estadística | Mediana del modelo | Mediana GARCH | Mediana gaussiana | AUC vs GARCH | AUC vs gaussiana |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Curtosis | 6.304 | 4.28 | 3 | 0.962 | 1.000 |
-| ACF(retornos, 1) | -0.003142 | 0.000766 | 0.0002724 | 0.426 | 0.351 |
-| ACF(abs, 1) | 0.169 | 0.1674 | -2.617e-05 | 0.517 | 1.000 |
-| ACF(abs, 50) | 0.1126 | 0.05986 | -3.298e-05 | 0.989 | 1.000 |
-| Ratio de colas | 44.36 | 25.73 | 0.9472 | 0.985 | 1.000 |
+| Curtosis | 6.304 | 4.28 | 3 | 0.962 [0.93, 0.99] | 1.000 [1.00, 1.00] |
+| ACF(retornos, 1) | -0.003142 | 0.000766 | 0.0002724 | 0.426 [0.33, 0.54] | 0.351 [0.25, 0.45] |
+| ACF(abs, 1) | 0.169 | 0.1674 | -2.617e-05 | 0.517 [0.40, 0.63] | 1.000 [1.00, 1.00] |
+| ACF(abs, 50) | 0.1126 | 0.05986 | -3.298e-05 | 0.989 [0.97, 1.00] | 1.000 [1.00, 1.00] |
+| Ratio de colas | 44.36 | 25.73 | 0.9472 | 0.985 [0.97, 1.00] | 1.000 [1.00, 1.00] |
 
-La curtosis separa el modelo de GARCH con AUC 0.962.  ACF(abs, 50) es más
-fuerte, 0.989.  ACF(abs, 1) se queda en 0.517, casi una moneda al aire, así que
-el hecho de agrupación rápida no distingue los dos modelos.  La autocorrelación
-lenta es el discriminante más fuerte.
+Los corchetes son intervalos bootstrap del 95%.  La curtosis separa el modelo de
+GARCH con AUC 0.962.  ACF(abs, 50) es más fuerte, 0.989.  ACF(abs, 1) se queda
+en 0.517, y su intervalo [0.40, 0.63] contiene 0.5, así que el hecho de
+agrupación rápida no distingue los dos modelos.  La autocorrelación lenta es el
+discriminante más fuerte.
 
 La rejilla de umbrales del mismo informe muestra la región de separación.  Con
 curtosis > 4 y ratio de colas > 10 el modelo pasa los cinco en 50/50 semillas y
@@ -1249,6 +1280,34 @@ La separación es más nítida entre 4 y 5.  La figura `docs/discrimination.png`
 muestra la tasa del modelo, la de GARCH y su diferencia en toda la rejilla.
 
 ![Rejilla de discriminación](docs/discrimination.png)
+
+### Hechos adicionales frente a los benchmarks
+
+Los cinco hechos de precio no son todo el repertorio.
+`docs/additional_discrimination.md` compara el modelo, GARCH y ruido gaussiano
+en los cuatro hechos adicionales que no necesitan volumen.  El adelanto del
+volumen se omite porque los benchmarks no lo tienen.  El comando es:
+
+```bash
+python scripts/run_additional_discrimination.py --config configs/baseline.json --seeds 1001-1020 --series 100 --n 100000 --jobs 8
+```
+
+| Hecho adicional | Mediana del modelo | Mediana GARCH | Mediana gaussiana | AUC vs GARCH | AUC vs gaussiana |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Efecto apalancamiento | 0.00426 | -0.0008269 | 0.0005386 | 0.298 | 0.352 |
+| Asimetría ganancias/pérdidas | 0.9931 | 0.9992 | 0.9985 | 0.391 | 0.378 |
+| Exponente de Hurst DFA | 0.8592 | 0.7378 | 0.5004 | 0.998 | 1.000 |
+| Ratio de agregación | 0.7545 | 1.002 | 0.9977 | 0.804 | 0.840 |
+
+El exponente de Hurst DFA separa el modelo de GARCH con AUC 0.998.  La
+Gaussianidad agregacional separa de forma moderada, 0.804: el ratio del modelo
+es 0.755 y el de GARCH 1.002.  El apalancamiento no separa en la dirección
+esperada.  Su AUC es 0.298 y la mediana del modelo es ligeramente positiva,
+0.00426, frente a -0.00083 de GARCH.  La asimetría ganancias/pérdidas se queda
+cerca de una moneda al aire, 0.391, con ambas medianas cerca de 1.  Los hechos
+adicionales añaden el exponente DFA y la Gaussianidad agregacional a los
+discriminantes.  El apalancamiento y la asimetría no ayudan.  El exponente DFA y
+ACF(abs, 50) son dos vistas de la misma persistencia lenta.
 
 ### Precio y volumen
 
@@ -1373,7 +1432,7 @@ Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
 valores absolutos.  El mapa de parámetros está en `docs/phase_diagram.png`.
 
-La suite tiene 312 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
+La suite tiene 320 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
 que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src`,
 `pytest --cov=market_sim --cov-fail-under=98`, `python scripts/check_docs.py`,
 `python scripts/check_versions.py`, `python scripts/check_results.py`,

@@ -10,17 +10,18 @@ python scripts/run_discrimination.py --config configs/baseline.json --series 100
 - GARCH and Gaussian samples: 100 series each
 - Observations per synthetic series: 100000
 - AUC is the probability that a random model value is on the model side
-  of a random benchmark value.  0.5 means no separation.
+  of a random benchmark value.  0.5 means no separation.  The brackets
+  are 95% bootstrap percentile intervals.
 
 ## Area under the ROC curve
 
 | Statistic | Model median | GARCH median | Gaussian median | AUC vs GARCH | AUC vs Gaussian |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Kurtosis | 6.304 | 4.28 | 3 | 0.962 | 1.000 |
-| ACF(returns, 1) | -0.003142 | 0.000766 | 0.0002724 | 0.426 | 0.351 |
-| ACF(abs, 1) | 0.169 | 0.1674 | -2.617e-05 | 0.517 | 1.000 |
-| ACF(abs, 50) | 0.1126 | 0.05986 | -3.298e-05 | 0.989 | 1.000 |
-| Tail ratio | 44.36 | 25.73 | 0.9472 | 0.985 | 1.000 |
+| Kurtosis | 6.304 | 4.28 | 3 | 0.962 [0.93, 0.99] | 1.000 [1.00, 1.00] |
+| ACF(returns, 1) | -0.003142 | 0.000766 | 0.0002724 | 0.426 [0.33, 0.54] | 0.351 [0.25, 0.45] |
+| ACF(abs, 1) | 0.169 | 0.1674 | -2.617e-05 | 0.517 [0.40, 0.63] | 1.000 [1.00, 1.00] |
+| ACF(abs, 50) | 0.1126 | 0.05986 | -3.298e-05 | 0.989 [0.97, 1.00] | 1.000 [1.00, 1.00] |
+| Tail ratio | 44.36 | 25.73 | 0.9472 | 0.985 [0.97, 1.00] | 1.000 [1.00, 1.00] |
 
 ## Threshold grid
 

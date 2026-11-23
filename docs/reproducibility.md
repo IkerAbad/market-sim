@@ -52,6 +52,7 @@ python scripts/run_benchmark_rates.py --config configs/baseline.json --series 10
 python scripts/run_strict_criteria.py --config configs/baseline.json --input docs/robustness_50.csv
 python scripts/run_null_distribution.py --config configs/baseline.json --series 1000 --n 100000
 python scripts/run_discrimination.py --config configs/baseline.json --series 100 --n 100000
+python scripts/run_additional_discrimination.py --config configs/baseline.json --seeds 1001-1020 --series 100 --n 100000 --jobs 8
 python scripts/run_benchmark.py --config configs/baseline.json --steps 10000,50000,100000
 python scripts/run_sample_size.py --config configs/baseline.json --sizes 10000,50000,100000,200000 --seeds 1001-1003 --jobs 8
 python scripts/run_price_volume.py --config configs/baseline.json --results results --report docs/price_volume.md
@@ -121,8 +122,9 @@ regenerates the baseline and compares every metric with
 | `docs/benchmark_rates.csv` | `DEE83E03513203F07962B1A9853508DC4A23CCD6B390374D8CF91211D10EFE80` |
 | `docs/strict_criteria.csv` | `121C1A44ECF4AE6732FA939A447E4B925D07DF9D3B018D49B0093AA0C8D95FF0` |
 | `docs/null_distribution.csv` | `723603B4A00EDC635593C82F3D7B2E3628C02EB411EB1C3574873E7710FA5C09` |
-| `docs/discrimination.csv` | `3455B3F6D0004FB379630F3F260516BBF5C33A689042839B9E3556DB8E467D18` |
+| `docs/discrimination.csv` | `736616A2DE75154AFF2F38360A0DCEE01A0E458E295A6BA3F5A45408F8D36252` |
 | `docs/discrimination_grid.csv` | `97263D626518BCF5DB070F2C5E62474977DFBE16B55D54ECE51C70FFA8D4C4DC` |
+| `docs/additional_discrimination.csv` | `0E1594A759DA8577EFD79CD0F002321BFF3F73693BF56812964AFD2E54DACFB7` |
 | `docs/discrimination.png` | `AB7B2496825C1DC47EBC9A0DEE56330729BCF5E602879D6F7349870F47848015` |
 | `docs/performance.csv` | `A1B4533529576001C410697F8ED15A5C37942C493E97603F3E44A58878265591` |
 | `docs/sample_size.csv` | `F319DDDAB1ADC1B5E85359960C29B88D65FE2FDEE51877DC8EDE11669EDE57B8` |

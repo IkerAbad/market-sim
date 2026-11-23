@@ -7,7 +7,7 @@ study whether a small set of behavioural rules can generate five stylized facts
 of return series.  The model is not estimated from market data and is not a
 forecasting system.
 
-- Version: 0.8.0
+- Version: 0.9.0
 - License: MIT
 - Author: Iker Abad
 - Repository: https://github.com/IkerAbad/market-sim
@@ -90,6 +90,13 @@ kurtosis, 0.989 for ACF(abs, 50) and 0.517 for ACF(abs, 1).  The slow
 clustering fact is the stronger discriminator.  At kurtosis > 4 and tail ratio
 > 10 the model passes 50/50 seeds and GARCH 93/100.  At kurtosis > 5 the model
 passes 46/50 and GARCH falls to 5/100.
+
+`docs/additional_discrimination.md` extends the AUC comparison to the four
+additional facts that do not need volume.  DFA Hurst separates the model from
+GARCH with AUC 0.998 and aggregational Gaussianity with 0.804.  Leverage and
+gain/loss asymmetry do not separate the two.  The model's leverage median is
+slightly positive, 0.00426, so the model does not produce the usual leverage
+effect.  The distinctive content is long memory.
 
 Five additional diagnostics are in `docs/additional_facts.md`.  The model
 reproduces the long-memory DFA exponent and aggregational Gaussianity but not

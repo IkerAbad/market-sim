@@ -195,6 +195,27 @@ def volume_volatility_lead_lag(
     return best_lag, correlations[best_lag], correlations
 
 
+def non_volume_metrics(returns: NumericSeries) -> dict[str, float]:
+    """Compute the four additional facts that do not need a volume series."""
+    r = np.asarray(returns, dtype=float)
+    if r.ndim != 1 or r.size < 64:
+        raise ValueError("returns must be a one-dimensional series of length 64 or more")
+    if not np.all(np.isfinite(r)):
+        raise ValueError("returns contain non-finite values")
+    leverage = leverage_effect(r, lag=1)
+    asymmetry = gain_loss_asymmetry(r)
+    hurst = dfa_hurst(np.abs(r - r.mean()))
+    aggregation = aggregational_kurtosis(r)
+    first = aggregation[1]
+    ratio = aggregation[60] / first if first > 0 else float("nan")
+    return {
+        "leverage_lag1": leverage,
+        "gain_loss_volatility_ratio": float(asymmetry["volatility_ratio"]),
+        "dfa_hurst_abs": hurst,
+        "aggregational_ratio": float(ratio),
+    }
+
+
 def additional_metrics(returns: NumericSeries, volume: NumericSeries) -> dict[str, float | int]:
     """Compute all additional diagnostics in one call."""
     r = np.asarray(returns, dtype=float)

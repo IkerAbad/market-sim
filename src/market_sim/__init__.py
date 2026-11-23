@@ -8,6 +8,15 @@ from .ablations import (
     run_ablation_grid,
     summarize_ablations,
 )
+from .additional_discrimination import (
+    AdditionalDiscriminationRow,
+    additional_discrimination_rows,
+    format_additional_discrimination_markdown,
+    run_model_ensemble,
+    run_model_seed,
+    samples_from_generator,
+    write_additional_discrimination_csv,
+)
 from .agents import CHARTIST, FUNDAMENTALIST, NOISE, Population
 from .api_docs import build_api_markdown, check_api_docs
 from .baseline_check import compare_baseline, compare_summaries
@@ -154,7 +163,7 @@ from .thresholds import (
 )
 from .version_check import check_versions
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 
 __all__ = [
     "ABLATIONS",
@@ -167,6 +176,7 @@ __all__ = [
     "Ablation",
     "AblationResult",
     "AblationSummary",
+    "AdditionalDiscriminationRow",
     "BenchmarkPoint",
     "BenchmarkRate",
     "BenchmarkResult",
@@ -195,6 +205,7 @@ __all__ = [
     "StrictSummary",
     "ThresholdCell",
     "ThresholdRow",
+    "additional_discrimination_rows",
     "additional_metrics",
     "aggregational_kurtosis",
     "all_facts_pass",
@@ -225,6 +236,7 @@ __all__ = [
     "evaluate_strict",
     "evaluate_thresholds",
     "extract_release_notes",
+    "format_additional_discrimination_markdown",
     "format_aggregational_table",
     "format_block_ensemble_markdown",
     "format_discrimination_markdown",
@@ -261,10 +273,13 @@ __all__ = [
     "run_commands",
     "run_diagnostics",
     "run_ensemble",
+    "run_model_ensemble",
+    "run_model_seed",
     "run_phase_grid",
     "run_sample_size_grid",
     "run_seed",
     "run_sensitivity_grid",
+    "samples_from_generator",
     "save_series_csv",
     "simulate",
     "student_t_returns",
@@ -281,6 +296,7 @@ __all__ = [
     "volume_diagnostics",
     "volume_volatility_lead_lag",
     "wilson_interval",
+    "write_additional_discrimination_csv",
     "write_block_ensemble_csv",
     "write_discrimination_csv",
     "write_ensemble_csv",

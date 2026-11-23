@@ -170,3 +170,8 @@ jobs:
           test -s /tmp/discrimination.md
           test -s /tmp/discrimination_grid.csv
           test -s /tmp/discrimination.png
+      - name: Additional facts discrimination
+        run: |
+          python scripts/run_additional_discrimination.py --seeds 1-2 --series 10 --n 20000 --jobs 2 --report /tmp/additional_discrimination.md --csv /tmp/additional_discrimination.csv
+          test -s /tmp/additional_discrimination.md
+          test -s /tmp/additional_discrimination.csv
