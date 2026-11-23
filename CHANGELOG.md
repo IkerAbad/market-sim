@@ -6,6 +6,13 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-23
+
+### Fixed
+
+- The release workflow installs the built wheel before extracting the release
+  notes, so the notes script has its runtime dependencies.
+
 ## [0.4.0] - 2026-11-23
 
 ### Added
