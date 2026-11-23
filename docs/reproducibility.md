@@ -100,7 +100,28 @@ The CI workflow runs the same gates.  It also runs the full 101,000-step
 baseline, builds the three figures, runs a 3-seed ensemble smoke test and
 installs the built wheel in a clean environment.  The pinned reference job
 regenerates the baseline and compares every metric with
-`docs/baseline_metrics.json` at a relative tolerance of 1e-9.
+`docs/baseline_metrics.json` at a relative tolerance of 1e-9.  Two additional
+jobs run the baseline on Ubuntu and Windows with the pinned environment, hash
+`metrics.json` and `series.csv`, and compare the two hashes bit for bit.
+
+## Clean clone
+
+To repeat the full validation from a clean checkout:
+
+```bash
+git clone https://github.com/IkerAbad/market-sim.git market-sim-check
+cd market-sim-check
+python -m venv .venv
+.venv\Scripts\activate
+python -m pip install -c constraints-reference.txt -e ".[dev]"
+python scripts/reproduce_all.py --jobs 8
+python scripts/check_hashes.py
+python scripts/check_results.py
+```
+
+On Linux or macOS use `source .venv/bin/activate`.  The reproduction command
+regenerates the baseline, the figures and every analysis.  The hash check
+compares the regenerated files with the committed table.
 
 ## Committed outputs
 

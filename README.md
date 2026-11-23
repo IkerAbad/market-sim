@@ -164,10 +164,10 @@ market-sim version
 map and additional-facts reports are generated with `scripts/run_inference.py`,
 `scripts/run_phase_diagram.py` and `scripts/run_extra_facts.py`.
 
-Model card: `MODEL_CARD.md`.  Environment and output hashes:
-`docs/reproducibility.md`.  API reference: `docs/api.md`.  Architecture:
-`docs/architecture.md`.  Data dictionary: `docs/data_dictionary.md`.  FAQ:
-`docs/faq.md`.
+Model card: `MODEL_CARD.md`.  Paper: `docs/paper.md`.  Environment and output
+hashes: `docs/reproducibility.md`.  API reference: `docs/api.md`.
+Architecture: `docs/architecture.md`.  Data dictionary:
+`docs/data_dictionary.md`.  FAQ: `docs/faq.md`.
 
 The same seed produces the same arrays:
 
@@ -204,7 +204,8 @@ python scripts/reproduce_all.py --skip-50-seeds
 ```
 
 The full run takes several minutes and overwrites the generated files under
-`results/` and `docs/`.
+`results/` and `docs/`.  It ends by checking every README table against the
+regenerated reports with `scripts/check_readme.py`.
 
 ## Results
 
@@ -853,7 +854,7 @@ the model.  The data are not committed.
 python -m pytest
 ```
 
-The suite has 320 tests and 99% branch coverage:
+The suite has 334 tests and 99% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
   population, the simulated series and the committed baseline summary,
@@ -892,6 +893,7 @@ reproduction job.  The workflow file is `.github/workflows/ci.yml`.
 - `python scripts/check_docs.py` for local documentation links
 - `python scripts/check_versions.py` for version consistency
 - `python scripts/check_results.py` for README table consistency
+- `python scripts/check_readme.py` for every README results table
 - `python scripts/build_api_docs.py --check` for API reference consistency
 - `python scripts/check_hashes.py` for committed output hashes
 - `python scripts/compare_baseline.py` after a baseline run
@@ -921,15 +923,24 @@ python scripts/run_benchmark.py --config configs/baseline.json --steps 10000,500
 ## Releases
 
 Pushing a `v*` tag triggers `.github/workflows/release.yml`.  The workflow
-builds the sdist and wheel, runs `twine check`, extracts the matching section
-from `CHANGELOG.md` and creates the GitHub release with both artifacts.  The
-version in `pyproject.toml`, `CITATION.cff` and `src/market_sim/__init__.py`
-must match the tag.
+builds the sdist and wheel, runs `twine check`, publishes the distribution to
+PyPI with trusted publishing, extracts the matching section from `CHANGELOG.md`,
+creates the GitHub release with both artifacts and publishes the container to
+GitHub Container Registry.  The version in `pyproject.toml`, `CITATION.cff` and
+`src/market_sim/__init__.py` must match the tag.
 
 ## Container
 
 The repository ships a `Dockerfile` with the package and the baseline
-configuration:
+configuration.  The release image is published to GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/ikerabad/market-sim:1.0.0
+docker run --rm ghcr.io/ikerabad/market-sim:1.0.0 version
+docker run --rm ghcr.io/ikerabad/market-sim:1.0.0 simulate --config configs/baseline.json --output /tmp/results
+```
+
+To build it locally:
 
 ```bash
 docker build -t market-sim .
@@ -950,6 +961,10 @@ Contributor setup is in `CONTRIBUTING.md`.
 
 ## Español
 
+Todas las tablas de esta sección se regeneran con
+`python scripts/reproduce_all.py --jobs 8`.  Los comandos individuales de los
+análisis más recientes aparecen junto a cada tabla.
+
 Simulador de mercado basado en agentes, escrito para medir hechos estilizados
 en lugar de afirmarlos.  El modelo es un juguete controlado, no una previsión.
 La ejecución base reproduce los cinco hechos con los criterios indicados.  Una
@@ -958,7 +973,8 @@ reproduce en 20/20.  Cinco diagnósticos adicionales se reportan aparte, y el
 modelo solo reproduce dos de ellos.  La ablación muestra que las seis filas
 vienen del proceso de actividad, no de los tres tipos.  Una versión solo de
 ruido las pasa todas.  El análisis de sensibilidad muestra de dónde sale ese
-resultado y qué parámetro lo rompe.
+resultado y qué parámetro lo rompe.  El artículo completo está en
+`docs/paper.md`.
 
 ### Modelo
 
@@ -1379,6 +1395,15 @@ el modelo.  Los datos no se suben al repositorio.
 
 ### Contenedor
 
+La imagen de la release se publica en GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/ikerabad/market-sim:1.0.0
+docker run --rm ghcr.io/ikerabad/market-sim:1.0.0 version
+```
+
+Para construirla en local:
+
 ```bash
 docker build -t market-sim .
 docker run --rm market-sim version
@@ -1432,13 +1457,14 @@ Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
 valores absolutos.  El mapa de parámetros está en `docs/phase_diagram.png`.
 
-La suite tiene 320 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
+La suite tiene 334 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
 que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src`,
 `pytest --cov=market_sim --cov-fail-under=98`, `python scripts/check_docs.py`,
 `python scripts/check_versions.py`, `python scripts/check_results.py`,
-`python scripts/build_api_docs.py --check` y `python scripts/check_hashes.py`.
-Tras ejecutar el baseline, `python scripts/compare_baseline.py` comprueba que
-las métricas coinciden con `docs/baseline_metrics.json`.
+`python scripts/check_readme.py`, `python scripts/build_api_docs.py --check` y
+`python scripts/check_hashes.py`.  Tras ejecutar el baseline,
+`python scripts/compare_baseline.py` comprueba que las métricas coinciden con
+`docs/baseline_metrics.json`.
 
 ### Licencia
 

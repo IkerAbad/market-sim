@@ -31,6 +31,11 @@ repos:
         entry: python scripts/check_results.py
         language: system
         pass_filenames: false
+      - id: readme-tables
+        name: README tables
+        entry: python scripts/check_readme.py
+        language: system
+        pass_filenames: false
       - id: api-docs
         name: API reference
         entry: python scripts/build_api_docs.py --check

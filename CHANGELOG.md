@@ -6,6 +6,25 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-23
+
+### Added
+
+- Paper `docs/paper.md`, a reproducible account of the model, the facts, the
+  ablations and the negative result on the three agent types.
+- Bit-for-bit reproducibility job in CI.  Ubuntu and Windows run the same seed
+  in the pinned environment and compare the result hash.
+- PyPI trusted publishing and GitHub Container Registry publishing in the
+  release workflow.
+- README table checker `scripts/check_readme.py`.  Every results table in the
+  README is compared with its generated report.
+- Stable result hash helper `scripts/result_hash.py`.
+
+### Changed
+
+- Version 1.0.0 freezes the model.  No parameter or process is added.
+- The suite has 334 tests and 99% branch coverage.
+
 ## [0.9.0] - 2026-11-23
 
 ### Added

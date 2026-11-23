@@ -113,9 +113,11 @@ from .phase import (
     summarize_phase,
 )
 from .price_volume import price_diagnostics, run_diagnostics, volume_diagnostics
+from .readme_tables import check_readme_tables
 from .real_data import compare_metrics, load_returns_csv
 from .release import extract_release_notes
 from .reproduce import full_commands, run_commands
+from .result_hash import combined_result_hash, result_hashes
 from .results_check import check_results
 from .sample_size import (
     SampleSizePoint,
@@ -163,7 +165,7 @@ from .thresholds import (
 )
 from .version_check import check_versions
 
-__version__ = "0.9.0"
+__version__ = "1.0.0"
 
 __all__ = [
     "ABLATIONS",
@@ -220,8 +222,10 @@ __all__ = [
     "check_api_docs",
     "check_docs",
     "check_hashes",
+    "check_readme_tables",
     "check_results",
     "check_versions",
+    "combined_result_hash",
     "compare_baseline",
     "compare_metrics",
     "compare_summaries",
@@ -267,6 +271,7 @@ __all__ = [
     "price_diagnostics",
     "rate_metrics",
     "rates_from_metrics_csv",
+    "result_hashes",
     "run_ablation_grid",
     "run_block_ensemble",
     "run_block_seed",

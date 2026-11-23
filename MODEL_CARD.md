@@ -7,10 +7,12 @@ study whether a small set of behavioural rules can generate five stylized facts
 of return series.  The model is not estimated from market data and is not a
 forecasting system.
 
-- Version: 0.9.0
+- Version: 1.0.0
 - License: MIT
 - Author: Iker Abad
 - Repository: https://github.com/IkerAbad/market-sim
+- Paper: `docs/paper.md`
+- Status: frozen.  No parameter or process is added after 1.0.0.
 
 ## Model details
 

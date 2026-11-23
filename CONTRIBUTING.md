@@ -22,6 +22,7 @@ pytest --cov=market_sim --cov-report=term-missing --cov-fail-under=98
 python scripts/check_docs.py
 python scripts/check_versions.py
 python scripts/check_results.py
+python scripts/check_readme.py
 python scripts/build_api_docs.py --check
 python scripts/check_hashes.py
 python scripts/compare_baseline.py
