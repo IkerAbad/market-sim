@@ -51,6 +51,13 @@ python scripts/run_benchmarks.py --config configs/baseline.json --results result
 python scripts/run_benchmark.py --config configs/baseline.json --steps 10000,50000,100000
 python scripts/run_sample_size.py --config configs/baseline.json --sizes 10000,50000,100000,200000 --seeds 1001-1003 --jobs 8
 python scripts/run_price_volume.py --config configs/baseline.json --results results --report docs/price_volume.md
+python scripts/run_stability.py --config configs/baseline.json --results results --blocks 10
+```
+
+To run every analysis in order:
+
+```bash
+python scripts/reproduce_all.py --jobs 8
 ```
 
 The ensemble, phase map, ablation and sensitivity runners use a process pool.
@@ -107,6 +114,7 @@ installs the built wheel in a clean environment.
 | `docs/performance.csv` | `A1B4533529576001C410697F8ED15A5C37942C493E97603F3E44A58878265591` |
 | `docs/sample_size.csv` | `F319DDDAB1ADC1B5E85359960C29B88D65FE2FDEE51877DC8EDE11669EDE57B8` |
 | `docs/price_volume.csv` | `6948769BC613DEC23C717ED13BD6758376FD1D362848649F7DB374AF3FFB7602` |
+| `docs/stability.csv` | `63766A0C0219BAB3BAB9E378480169C915D732581F2DE2CEFBADDDEC57245FF3` |
 | `docs/baseline_metrics.json` | `31F33A81C8465CFC2606B8FF300A8151DF4421594CB7C936AA09A3C544020DE5` |
 
 The three baseline figures are byte-identical when regenerated in the reference

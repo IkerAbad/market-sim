@@ -6,6 +6,27 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-23
+
+### Added
+
+- Block-stability analysis in `docs/stability.md` and `docs/stability.csv`.  The
+  baseline window is split into ten contiguous blocks and the six statistics
+  are recomputed inside each block.
+- Version consistency checker in `scripts/check_versions.py` and a CI step.
+- README results table checker in `scripts/check_results.py` and a CI step.
+- Generated API reference in `docs/api.md` with
+  `scripts/build_api_docs.py --check` in CI.
+- One-command reproduction in `scripts/reproduce_all.py`.
+- Data dictionary, architecture and FAQ documents.
+
+### Changed
+
+- The public API exports the stability functions.
+- The quality job checks documentation links, versions, README values and the
+  API reference.
+- The suite has 261 tests and 99% branch coverage.
+
 ## [0.4.1] - 2026-11-23
 
 ### Fixed

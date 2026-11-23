@@ -165,7 +165,9 @@ map and additional-facts reports are generated with `scripts/run_inference.py`,
 `scripts/run_phase_diagram.py` and `scripts/run_extra_facts.py`.
 
 Model card: `MODEL_CARD.md`.  Environment and output hashes:
-`docs/reproducibility.md`.
+`docs/reproducibility.md`.  API reference: `docs/api.md`.  Architecture:
+`docs/architecture.md`.  Data dictionary: `docs/data_dictionary.md`.  FAQ:
+`docs/faq.md`.
 
 The same seed produces the same arrays:
 
@@ -184,6 +186,22 @@ promise bit-for-bit identical `Generator` streams across every version, so the
 committed numbers were produced in one reference environment: Python 3.14.5,
 NumPy 2.5.5, Matplotlib 3.11.2, Windows 11.  CI runs Python 3.12, 3.13 and
 3.14 on Ubuntu and Windows.
+
+## Reproduce everything
+
+`scripts/reproduce_all.py` runs the baseline, the figures, the ensembles, the
+bootstrap, the phase map, the ablations, the sensitivity, the thresholds, the
+additional facts, the benchmarks, the performance timing, the sample-size scan,
+the price-volume diagnostics and the block-stability table in order:
+
+```bash
+python scripts/reproduce_all.py --dry-run
+python scripts/reproduce_all.py --jobs 8
+python scripts/reproduce_all.py --skip-50-seeds
+```
+
+The full run takes several minutes and overwrites the generated files under
+`results/` and `docs/`.
 
 ## Results
 
@@ -568,6 +586,31 @@ The price gap is persistent, with a half-life of 64.6 steps.  The volume is
 heavy-tailed and strongly autocorrelated.  These are descriptive diagnostics,
 not target facts.
 
+## Block stability
+
+A single 100,000-step series can hide a result that comes from one short
+episode.  `docs/stability.md` splits the analysis window into ten contiguous
+blocks of 10,000 returns and recomputes the six statistics inside each block.
+The command is:
+
+```bash
+python scripts/run_stability.py --config configs/baseline.json --results results --blocks 10
+```
+
+| Statistic | Mean | Min | Max | Blocks passing |
+| --- | ---: | ---: | ---: | ---: |
+| Kurtosis | 4.546 | 3.584 | 7.773 | 10/10 |
+| ACF(returns, lag 1) | -0.003575 | -0.02629 | 0.02405 | 10/10 |
+| ACF(abs(returns), lag 1) | 0.1198 | 0.07257 | 0.1952 | 10/10 |
+| ACF(abs(returns), lag 50) | 0.0925 | 0.0577 | 0.1539 | 10/10 |
+| corr(volume, abs(returns)) | 0.4818 | 0.3977 | 0.5505 | 10/10 |
+| P(abs(r) > 4 sd) / P_normal | 26.36 | 12.63 | 59.99 | 10/10 |
+
+Every statistic meets its full-sample criterion in every block.  Kurtosis is
+the least stable row: its block minimum is 3.584, close to the threshold of 3.
+This agrees with the seed and sample-size results.  The direction of the facts
+is robust, the magnitude of the tail statistics is not.
+
 ## Bring your own data
 
 No market data are bundled.  `scripts/compare_real_data.py` compares any CSV
@@ -622,7 +665,7 @@ the model.  The data are not committed.
 python -m pytest
 ```
 
-The suite has 225 tests and 99% branch coverage:
+The suite has 261 tests and 99% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
   population and the simulated series,
@@ -636,10 +679,11 @@ The suite has 225 tests and 99% branch coverage:
 - multi-seed ensemble, bootstrap, phase grid and additional-facts diagnostics,
 - component ablations, one-at-a-time sensitivity and threshold sensitivity,
 - synthetic benchmarks and performance timing,
-- finite-sample and price-volume diagnostics,
+- finite-sample, price-volume and block-stability diagnostics,
 - the real-data comparison loader and table,
 - the command-line interface, including error paths and `python -m market_sim`,
-- documentation link checks and release-note extraction,
+- documentation link checks, version, results-table and API-documentation
+  consistency checks and release-note extraction,
 - property-based tests with Hypothesis for statistical invariants,
 - all three figure functions with the Agg backend.
 
@@ -654,6 +698,9 @@ reproduction job.  The workflow file is `.github/workflows/ci.yml`.
 - `mypy src` in strict mode
 - `pytest --cov=market_sim --cov-fail-under=98`
 - `python scripts/check_docs.py` for local documentation links
+- `python scripts/check_versions.py` for version consistency
+- `python scripts/check_results.py` for README table consistency
+- `python scripts/build_api_docs.py --check` for API reference consistency
 - `python -m build` and `twine check dist/*`
 - installation and smoke test of the built wheel
 - full 101,000-step baseline, all three figures and a 3-seed ensemble in CI
@@ -740,7 +787,8 @@ El valor fundamental es constante, 100.  El precio es estacionario alrededor de
 ese valor.  No hay noticias, tendencias de largo plazo ni dinámica de riqueza.
 
 Todos los parámetros y la semilla están en `configs/baseline.json`.  La misma
-semilla produce la misma serie.
+semilla produce la misma serie.  La arquitectura está en
+`docs/architecture.md` y el diccionario de datos en `docs/data_dictionary.md`.
 
 ### Resultados
 
@@ -921,6 +969,23 @@ AR(1) 0.9893 y semivida 64.64 pasos.  El volumen tiene curtosis 5.99, ACF(1)
 0.5746 y ACF(10) 0.559.  La correlación con abs(retornos) es 0.5016.  Son
 diagnósticos descriptivos, no hechos objetivo.
 
+### Estabilidad por bloques
+
+Una sola serie de 100.000 pasos puede esconder un resultado que venga de un
+episodio corto.  `docs/stability.md` parte la ventana en diez bloques contiguos
+de 10.000 retornos y recalcula las seis estadísticas en cada bloque:
+
+```bash
+python scripts/run_stability.py --config configs/baseline.json --results results --blocks 10
+```
+
+Las seis estadísticas cumplen su criterio en los diez bloques.  La curtosis es
+la menos estable: mínimo 3.584, máximo 7.773, media 4.546.  El ACF de retornos
+se queda entre -0.02629 y 0.02405.  El ACF de abs(retornos) en el lag 1 baja
+como mínimo a 0.07257 y en el lag 50 a 0.0577.  La correlación
+volumen-volatilidad baja como mínimo a 0.3977 y el ratio de colas a 12.63.  La
+dirección de los hechos aguanta, la magnitud de las colas no.
+
 ### Rendimiento
 
 En la máquina de referencia (Ryzen 9 5900X, 32 GB DDR4-3600, Windows 11), el
@@ -985,6 +1050,8 @@ python scripts/run_extra_facts.py --results results --report docs/additional_fac
 python -m pytest
 ```
 
+El flujo completo se puede lanzar con `python scripts/reproduce_all.py --jobs 8`.
+
 El mismo flujo base está en `market-sim simulate`, `market-sim figures` y
 `market-sim ensemble`.
 
@@ -992,9 +1059,11 @@ Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
 valores absolutos.  El mapa de parámetros está en `docs/phase_diagram.png`.
 
-La suite tiene 225 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
-que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src` y
-`pytest --cov=market_sim --cov-fail-under=98`.
+La suite tiene 261 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
+que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src`,
+`pytest --cov=market_sim --cov-fail-under=98`, `python scripts/check_docs.py`,
+`python scripts/check_versions.py`, `python scripts/check_results.py` y
+`python scripts/build_api_docs.py --check`.
 
 ### Licencia
 

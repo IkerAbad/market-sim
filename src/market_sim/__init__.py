@@ -9,6 +9,7 @@ from .ablations import (
     summarize_ablations,
 )
 from .agents import CHARTIST, FUNDAMENTALIST, NOISE, Population
+from .api_docs import build_api_markdown, check_api_docs
 from .benchmark import BenchmarkResult, time_simulation
 from .benchmarks import (
     BenchmarkPoint,
@@ -63,6 +64,8 @@ from .phase import (
 from .price_volume import price_diagnostics, run_diagnostics, volume_diagnostics
 from .real_data import compare_metrics, load_returns_csv
 from .release import extract_release_notes
+from .reproduce import full_commands, run_commands
+from .results_check import check_results
 from .sample_size import (
     SampleSizePoint,
     SampleSizeSummary,
@@ -73,6 +76,13 @@ from .sensitivity import (
     SENSITIVITY_VARIANTS,
     run_sensitivity_grid,
     summarize_sensitivity,
+)
+from .stability import (
+    BlockMetrics,
+    block_metrics,
+    format_stability_markdown,
+    summarize_blocks,
+    write_stability_csv,
 )
 from .stylized import (
     all_facts_pass,
@@ -89,8 +99,9 @@ from .thresholds import (
     evaluate_thresholds,
     load_metrics_csv,
 )
+from .version_check import check_versions
 
-__version__ = "0.4.1"
+__version__ = "0.5.0"
 
 __all__ = [
     "ABLATIONS",
@@ -103,6 +114,7 @@ __all__ = [
     "AblationSummary",
     "BenchmarkPoint",
     "BenchmarkResult",
+    "BlockMetrics",
     "BootstrapResult",
     "BootstrapSummary",
     "EnsembleSummary",
@@ -123,8 +135,13 @@ __all__ = [
     "autocorrelation",
     "benchmark_metrics",
     "block_indices",
+    "block_metrics",
     "bootstrap_metrics",
+    "build_api_markdown",
+    "check_api_docs",
     "check_docs",
+    "check_results",
+    "check_versions",
     "compare_metrics",
     "compute_metrics",
     "config_from_dict",
@@ -136,7 +153,9 @@ __all__ = [
     "evaluate_thresholds",
     "extract_release_notes",
     "format_markdown_table",
+    "format_stability_markdown",
     "format_summary_markdown",
+    "full_commands",
     "gain_loss_asymmetry",
     "garch11_returns",
     "gaussian_returns",
@@ -150,6 +169,7 @@ __all__ = [
     "plot_phase_heatmap",
     "price_diagnostics",
     "run_ablation_grid",
+    "run_commands",
     "run_diagnostics",
     "run_ensemble",
     "run_phase_grid",
@@ -160,6 +180,7 @@ __all__ = [
     "simulate",
     "student_t_returns",
     "summarize_ablations",
+    "summarize_blocks",
     "summarize_ensemble",
     "summarize_phase",
     "summarize_sample_size",
@@ -170,4 +191,5 @@ __all__ = [
     "volume_volatility_lead_lag",
     "wilson_interval",
     "write_ensemble_csv",
+    "write_stability_csv",
 ]

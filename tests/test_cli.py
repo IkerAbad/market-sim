@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+from market_sim import __version__
 from market_sim.cli import ensemble_main, figures_main, main, simulate_main
 from market_sim.config import config_to_dict, load_config
 
@@ -26,7 +27,7 @@ def write_small_config(tmp_path: Path) -> Path:
 
 def test_version(capsys) -> None:
     assert main(["version"]) == 0
-    assert "0.4.1" in capsys.readouterr().out
+    assert __version__ in capsys.readouterr().out
 
 
 def test_simulate_cli(tmp_path) -> None:
@@ -234,4 +235,4 @@ def test_python_module_entrypoint(monkeypatch, capsys) -> None:
     with pytest.raises(SystemExit) as exc:
         runpy.run_module("market_sim", run_name="__main__")
     assert exc.value.code == 0
-    assert "0.4.1" in capsys.readouterr().out
+    assert __version__ in capsys.readouterr().out

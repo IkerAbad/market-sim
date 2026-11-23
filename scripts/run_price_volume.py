@@ -47,6 +47,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def display_path(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def main() -> int:
     args = parse_args()
     config = load_config(args.config)
@@ -67,8 +74,8 @@ def main() -> int:
         "",
         "```",
         (
-            f"python scripts/run_price_volume.py --config {args.config.as_posix()} "
-            f"--results {args.results.as_posix()}"
+            f"python scripts/run_price_volume.py --config {display_path(args.config)} "
+            f"--results {display_path(args.results)}"
         ),
         "```",
         "",

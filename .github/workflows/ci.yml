@@ -25,6 +25,12 @@ jobs:
         run: mypy src
       - name: Documentation links
         run: python scripts/check_docs.py
+      - name: Version consistency
+        run: python scripts/check_versions.py
+      - name: Results consistency
+        run: python scripts/check_results.py
+      - name: API reference
+        run: python scripts/build_api_docs.py --check
 
   test:
     name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
@@ -127,3 +133,8 @@ jobs:
           test -s /tmp/ensemble/metrics.csv
           test -s /tmp/robustness.md
           test -s /tmp/robustness.csv
+      - name: Block stability
+        run: |
+          python scripts/run_stability.py --results results --blocks 10 --report /tmp/stability.md --csv /tmp/stability.csv
+          test -s /tmp/stability.md
+          test -s /tmp/stability.csv

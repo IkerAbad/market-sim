@@ -3,7 +3,7 @@
 Command:
 
 ```
-python scripts/run_price_volume.py --config C:/dev/market-sim/configs/baseline.json --results results
+python scripts/run_price_volume.py --config configs/baseline.json --results results
 ```
 
 - Observations: 100000

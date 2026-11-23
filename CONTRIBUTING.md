@@ -20,6 +20,9 @@ ruff format --check .
 mypy src
 pytest --cov=market_sim --cov-report=term-missing --cov-fail-under=98
 python scripts/check_docs.py
+python scripts/check_versions.py
+python scripts/check_results.py
+python scripts/build_api_docs.py --check
 python -m build
 ```
 
