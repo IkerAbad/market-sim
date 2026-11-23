@@ -10,6 +10,7 @@ from .ablations import (
 )
 from .agents import CHARTIST, FUNDAMENTALIST, NOISE, Population
 from .api_docs import build_api_markdown, check_api_docs
+from .baseline_check import compare_baseline, compare_summaries
 from .benchmark import BenchmarkResult, time_simulation
 from .benchmark_rates import (
     BenchmarkRate,
@@ -77,6 +78,12 @@ from .extra_facts import (
 )
 from .hashes import check_hashes
 from .market import SimulationResult, load_series_csv, save_series_csv, simulate
+from .null_distribution import (
+    NullStatistic,
+    format_null_markdown,
+    null_statistics,
+    write_null_csv,
+)
 from .phase import (
     PhasePoint,
     PhaseSummary,
@@ -107,6 +114,17 @@ from .stability import (
     summarize_blocks,
     write_stability_csv,
 )
+from .strict import (
+    STRICT_KURTOSIS,
+    STRICT_TAIL_RATIO,
+    StrictFact,
+    StrictFailure,
+    StrictSummary,
+    evaluate_strict,
+    format_strict_markdown,
+    load_seed_metrics,
+    write_strict_csv,
+)
 from .stylized import (
     all_facts_pass,
     autocorrelation,
@@ -124,7 +142,7 @@ from .thresholds import (
 )
 from .version_check import check_versions
 
-__version__ = "0.6.1"
+__version__ = "0.7.0"
 
 __all__ = [
     "ABLATIONS",
@@ -132,6 +150,8 @@ __all__ = [
     "FUNDAMENTALIST",
     "NOISE",
     "SENSITIVITY_VARIANTS",
+    "STRICT_KURTOSIS",
+    "STRICT_TAIL_RATIO",
     "Ablation",
     "AblationResult",
     "AblationSummary",
@@ -147,6 +167,7 @@ __all__ = [
     "FactRate",
     "MetricsParams",
     "ModelParams",
+    "NullStatistic",
     "PhasePoint",
     "PhaseSummary",
     "Population",
@@ -156,6 +177,9 @@ __all__ = [
     "SimulationConfig",
     "SimulationResult",
     "StatisticBlockRate",
+    "StrictFact",
+    "StrictFailure",
+    "StrictSummary",
     "ThresholdRow",
     "additional_metrics",
     "aggregational_kurtosis",
@@ -172,7 +196,9 @@ __all__ = [
     "check_hashes",
     "check_results",
     "check_versions",
+    "compare_baseline",
     "compare_metrics",
+    "compare_summaries",
     "compute_metrics",
     "config_from_dict",
     "config_to_dict",
@@ -180,13 +206,16 @@ __all__ = [
     "dfa_hurst",
     "evaluate_benchmark",
     "evaluate_facts",
+    "evaluate_strict",
     "evaluate_thresholds",
     "extract_release_notes",
     "format_aggregational_table",
     "format_block_ensemble_markdown",
     "format_markdown_table",
+    "format_null_markdown",
     "format_rates_markdown",
     "format_stability_markdown",
+    "format_strict_markdown",
     "format_summary_markdown",
     "full_commands",
     "gain_loss_asymmetry",
@@ -197,9 +226,11 @@ __all__ = [
     "load_config",
     "load_metrics_csv",
     "load_returns_csv",
+    "load_seed_metrics",
     "load_series_csv",
     "metrics_from_generator",
     "metrics_from_metrics_csv",
+    "null_statistics",
     "parse_seeds",
     "plot_phase_heatmap",
     "price_diagnostics",
@@ -232,6 +263,8 @@ __all__ = [
     "wilson_interval",
     "write_block_ensemble_csv",
     "write_ensemble_csv",
+    "write_null_csv",
     "write_rates_csv",
     "write_stability_csv",
+    "write_strict_csv",
 ]

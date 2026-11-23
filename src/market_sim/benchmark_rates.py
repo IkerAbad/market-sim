@@ -15,6 +15,7 @@ import numpy as np
 
 from .benchmarks import benchmark_metrics, evaluate_benchmark
 from .config import MetricsParams
+from .ensemble import wilson_interval
 
 FACT_KEYS: tuple[tuple[str, str], ...] = (
     ("kurtosis", "Kurtosis"),
@@ -50,6 +51,10 @@ class BenchmarkRate:
     n_series: int
     facts: tuple[FactRate, ...]
     all_pass: int
+
+    @property
+    def all_pass_interval(self) -> tuple[float, float]:
+        return wilson_interval(self.all_pass, self.n_series)
 
 
 def rate_metrics(
@@ -129,12 +134,16 @@ def rates_from_metrics_csv(
 
 def format_rates_markdown(rates: Sequence[BenchmarkRate]) -> str:
     """Render the pass-rate table as Markdown."""
-    header = "| Series | " + " | ".join(label for _, label in FACT_KEYS) + " | All five |"
-    separator = "| --- | " + " | ".join("---:" for _ in FACT_KEYS) + " | ---: |"
+    header = "| Series | " + " | ".join(label for _, label in FACT_KEYS) + " | All five | 95% CI |"
+    separator = "| --- | " + " | ".join("---:" for _ in FACT_KEYS) + " | ---: | ---: |"
     lines = [header, separator]
     for rate in rates:
         cells = " | ".join(f"{fact.passes}/{fact.total}" for fact in rate.facts)
-        lines.append(f"| {rate.name} | {cells} | {rate.all_pass}/{rate.n_series} |")
+        lower, upper = rate.all_pass_interval
+        lines.append(
+            f"| {rate.name} | {cells} | {rate.all_pass}/{rate.n_series} | "
+            f"[{lower:.2f}, {upper:.2f}] |"
+        )
     return "\n".join(lines)
 
 

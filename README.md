@@ -191,9 +191,10 @@ NumPy 2.5.5, Matplotlib 3.11.2, Windows 11.  CI runs Python 3.12, 3.13 and
 
 `scripts/reproduce_all.py` runs the baseline, the figures, the ensembles, the
 bootstrap, the phase map, the ablations, the sensitivity, the thresholds, the
-additional facts, the benchmarks, the benchmark pass rates, the performance
-timing, the sample-size scan, the price-volume diagnostics, the block-stability
-table and the cross-seed block table in order:
+additional facts, the benchmarks, the benchmark pass rates, the strict hold-out
+table, the Gaussian null distribution, the performance timing, the sample-size
+scan, the price-volume diagnostics, the block-stability table and the
+cross-seed block table in order:
 
 ```bash
 python scripts/reproduce_all.py --dry-run
@@ -579,12 +580,12 @@ reports the fraction that passes each fact.  The model row uses the 50 seeds in
 python scripts/run_benchmark_rates.py --config configs/baseline.json --series 100 --n 100000
 ```
 
-| Series | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | Tail ratio | All five |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| market-sim baseline | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 |
-| Gaussian | 52/100 | 100/100 | 0/100 | 0/100 | 47/100 | 0/100 |
-| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 |
-| GARCH(1,1) | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 |
+| Series | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | Tail ratio | All five | 95% CI |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| market-sim baseline | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 | [0.93, 1.00] |
+| Gaussian | 52/100 | 100/100 | 0/100 | 0/100 | 47/100 | 0/100 | [0.00, 0.04] |
+| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 | [0.00, 0.04] |
+| GARCH(1,1) | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 | [0.96, 1.00] |
 
 Under the original criteria the Gaussian process passes the kurtosis fact in
 52 of 100 samples and the tail ratio in 47 of 100.  A sample kurtosis above 3
@@ -595,18 +596,67 @@ model.
 Tightening the two weak tail criteria to kurtosis above 5 and tail ratio above
 10 changes the result:
 
-| Series | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | Tail ratio | All five |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| market-sim baseline | 46/50 | 50/50 | 50/50 | 50/50 | 50/50 | 46/50 |
-| Gaussian | 0/100 | 100/100 | 0/100 | 0/100 | 0/100 | 0/100 |
-| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 |
-| GARCH(1,1) | 5/100 | 100/100 | 100/100 | 100/100 | 100/100 | 5/100 |
+| Series | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | Tail ratio | All five | 95% CI |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| market-sim baseline | 46/50 | 50/50 | 50/50 | 50/50 | 50/50 | 46/50 | [0.81, 0.97] |
+| Gaussian | 0/100 | 100/100 | 0/100 | 0/100 | 0/100 | 0/100 | [0.00, 0.04] |
+| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 | [0.00, 0.04] |
+| GARCH(1,1) | 5/100 | 100/100 | 100/100 | 100/100 | 100/100 | 5/100 | [0.02, 0.11] |
 
 The model passes all five stricter facts in 46 of 50 seeds, 92%.  GARCH passes
 in 5 of 100, and Gaussian and Student-t pass in none.  Raising the tail
 thresholds therefore separates the agent-based model from the benchmarks.  The
 main table keeps the original thresholds because they were fixed before these
 runs.  The weakness of the original tail criteria is a documented limitation.
+
+## Strict criteria on the hold-out
+
+`docs/strict_criteria.md` applies the same strict thresholds to the 50-seed
+hold-out.  The command is:
+
+```bash
+python scripts/run_strict_criteria.py --input docs/robustness_50.csv
+```
+
+| Fact | Criterion | Passes | 95% CI |
+| --- | --- | ---: | ---: |
+| Kurtosis | > 5 | 46/50 | [0.812, 0.968] |
+| ACF(returns, 1) | abs(value) < 0.05 | 50/50 | [0.929, 1.000] |
+| ACF(abs, 1) | > 0.05 | 50/50 | [0.929, 1.000] |
+| ACF(abs, 50) | > 0.02 | 50/50 | [0.929, 1.000] |
+| Tail ratio | > 10 | 50/50 | [0.929, 1.000] |
+| All five | - | 46/50 | [0.812, 0.968] |
+
+Four seeds fail only the strict kurtosis criterion: 1012 with 4.833, 1031 with
+4.759, 1035 with 4.564 and 1046 with 4.982.  The other four facts pass on every
+seed.  The strict criteria do not change the clustering conclusion, but they
+make the kurtosis row honest.
+
+## Null distribution under Gaussian noise
+
+`docs/null_distribution.md` gives the 5%, 50% and 95% quantiles of each price
+statistic over 1,000 independent Gaussian series of 100,000 returns, plus the
+model value and its percentile in that null.  The command is:
+
+```bash
+python scripts/run_null_distribution.py --config configs/baseline.json --series 1000 --n 100000
+```
+
+| Statistic | Gaussian 5% | Median | 95% | Model | Model percentile |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Kurtosis | 2.975 | 3.001 | 3.028 | 5.488 | 100.0% |
+| ACF(returns, 1) | -0.004923 | 0.000226 | 0.005366 | -0.004945 | 5.0% |
+| ACF(abs, 1) | -0.004767 | -0.0001644 | 0.005291 | 0.1443 | 100.0% |
+| ACF(abs, 50) | -0.005107 | -6.039e-06 | 0.005015 | 0.1176 | 100.0% |
+| Tail ratio | 0.4736 | 0.9472 | 1.737 | 32.21 | 100.0% |
+
+The kurtosis threshold of 3 is the median of the Gaussian null, so about half
+of Gaussian samples pass it.  The model value 5.488 is far outside the 95%
+quantile of 3.028.  The tail ratio behaves the same way: its Gaussian 95%
+quantile is 1.737 and the model value is 32.21.  The return autocorrelation is
+small in magnitude, near the 5% quantile of the null.  The absolute-return
+autocorrelations are far above the Gaussian 95% quantile, and that is the part
+of the table that a Gaussian process cannot reproduce.
 
 ## Price and volume
 
@@ -668,14 +718,14 @@ the 20 hold-out seeds, which gives 200 blocks.  The command is:
 python scripts/run_block_ensemble.py --config configs/baseline.json --seeds 1001-1020 --blocks 10 --jobs 8
 ```
 
-| Statistic | Blocks passing | Rate |
-| --- | ---: | ---: |
-| Kurtosis | 200/200 | 100.0% |
-| ACF(returns, lag 1) | 199/200 | 99.5% |
-| ACF(abs(returns), lag 1) | 200/200 | 100.0% |
-| ACF(abs(returns), lag 50) | 200/200 | 100.0% |
-| corr(volume, abs(returns)) | 200/200 | 100.0% |
-| P(abs(r) > 4 sd) / P_normal | 200/200 | 100.0% |
+| Statistic | Blocks passing | Rate | 95% CI |
+| --- | ---: | ---: | ---: |
+| Kurtosis | 200/200 | 100.0% | [98.1%, 100.0%] |
+| ACF(returns, lag 1) | 199/200 | 99.5% | [97.2%, 99.9%] |
+| ACF(abs(returns), lag 1) | 200/200 | 100.0% | [98.1%, 100.0%] |
+| ACF(abs(returns), lag 50) | 200/200 | 100.0% | [98.1%, 100.0%] |
+| corr(volume, abs(returns)) | 200/200 | 100.0% | [98.1%, 100.0%] |
+| P(abs(r) > 4 sd) / P_normal | 200/200 | 100.0% | [98.1%, 100.0%] |
 
 Nineteen of the 20 seeds pass all six statistics in all ten blocks.  The single
 failure is seed 1020, block 10, steps 90,000 to 100,000.  Its return
@@ -739,10 +789,10 @@ the model.  The data are not committed.
 python -m pytest
 ```
 
-The suite has 285 tests and 99% branch coverage:
+The suite has 306 tests and 99% branch coverage:
 
 - reproducibility with the same seed, including a separate check for the agent
-  population and the simulated series,
+  population, the simulated series and the committed baseline summary,
 - kurtosis and autocorrelation on hand-built series with known values,
 - tail, correlation and volume statistics, including constant-series,
   non-finite and tiny-scale errors,
@@ -753,7 +803,8 @@ The suite has 285 tests and 99% branch coverage:
 - multi-seed ensemble, bootstrap, phase grid and additional-facts diagnostics,
   including aggregational Gaussianity,
 - component ablations, one-at-a-time sensitivity and threshold sensitivity,
-- synthetic benchmarks, benchmark pass rates and performance timing,
+- synthetic benchmarks, benchmark pass rates, strict hold-out criteria,
+  Gaussian null quantiles and performance timing,
 - finite-sample, price-volume, block-stability and cross-seed block
   diagnostics,
 - the real-data comparison loader and table,
@@ -778,6 +829,7 @@ reproduction job.  The workflow file is `.github/workflows/ci.yml`.
 - `python scripts/check_results.py` for README table consistency
 - `python scripts/build_api_docs.py --check` for API reference consistency
 - `python scripts/check_hashes.py` for committed output hashes
+- `python scripts/compare_baseline.py` after a baseline run
 - `python -m build` and `twine check dist/*`
 - installation and smoke test of the built wheel
 - full 101,000-step baseline, all three figures and a 3-seed ensemble in CI
@@ -1053,12 +1105,12 @@ cuántas pasan cada hecho.  La fila del modelo usa las 50 semillas de
 python scripts/run_benchmark_rates.py --config configs/baseline.json --series 100 --n 100000
 ```
 
-| Serie | Curtosis | ACF(retornos, 1) | ACF(abs, 1) | ACF(abs, 50) | Ratio de colas | Los cinco |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| market-sim baseline | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 |
-| Gaussian | 52/100 | 100/100 | 0/100 | 0/100 | 47/100 | 0/100 |
-| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 |
-| GARCH(1,1) | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 |
+| Serie | Curtosis | ACF(retornos, 1) | ACF(abs, 1) | ACF(abs, 50) | Ratio de colas | Los cinco | IC 95% |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| market-sim baseline | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 | [0.93, 1.00] |
+| Gaussian | 52/100 | 100/100 | 0/100 | 0/100 | 47/100 | 0/100 | [0.00, 0.04] |
+| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 | [0.00, 0.04] |
+| GARCH(1,1) | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 | [0.96, 1.00] |
 
 Con los criterios originales, Gaussian pasa la curtosis en 52 de 100 muestras y
 el ratio de colas en 47 de 100.  Una curtosis muestral mayor que 3 es evidencia
@@ -1068,18 +1120,67 @@ en todas las muestras.
 Si se endurecen los dos criterios débiles a curtosis mayor que 5 y ratio de
 colas mayor que 10:
 
-| Serie | Curtosis | ACF(retornos, 1) | ACF(abs, 1) | ACF(abs, 50) | Ratio de colas | Los cinco |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| market-sim baseline | 46/50 | 50/50 | 50/50 | 50/50 | 50/50 | 46/50 |
-| Gaussian | 0/100 | 100/100 | 0/100 | 0/100 | 0/100 | 0/100 |
-| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 |
-| GARCH(1,1) | 5/100 | 100/100 | 100/100 | 100/100 | 100/100 | 5/100 |
+| Serie | Curtosis | ACF(retornos, 1) | ACF(abs, 1) | ACF(abs, 50) | Ratio de colas | Los cinco | IC 95% |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| market-sim baseline | 46/50 | 50/50 | 50/50 | 50/50 | 50/50 | 46/50 | [0.81, 0.97] |
+| Gaussian | 0/100 | 100/100 | 0/100 | 0/100 | 0/100 | 0/100 | [0.00, 0.04] |
+| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 | [0.00, 0.04] |
+| GARCH(1,1) | 5/100 | 100/100 | 100/100 | 100/100 | 100/100 | 5/100 | [0.02, 0.11] |
 
 El modelo pasa los cinco hechos estrictos en 46 de 50 semillas, el 92%.  GARCH
 pasa en 5 de 100, y Gaussian y Student-t en ninguna.  Endurecer los umbrales de
 las colas separa el modelo de los benchmarks.  La tabla principal mantiene los
 umbrales originales porque se fijaron antes de estas ejecuciones.  La debilidad
 de los criterios originales de colas queda documentada como limitación.
+
+### Criterios estrictos en la retención
+
+`docs/strict_criteria.md` aplica los mismos umbrales estrictos a las 50 semillas
+de retención:
+
+```bash
+python scripts/run_strict_criteria.py --input docs/robustness_50.csv
+```
+
+| Hecho | Criterio | Pasan | IC 95% |
+| --- | --- | ---: | ---: |
+| Curtosis | > 5 | 46/50 | [0.812, 0.968] |
+| ACF(retornos, 1) | abs(valor) < 0.05 | 50/50 | [0.929, 1.000] |
+| ACF(abs, 1) | > 0.05 | 50/50 | [0.929, 1.000] |
+| ACF(abs, 50) | > 0.02 | 50/50 | [0.929, 1.000] |
+| Ratio de colas | > 10 | 50/50 | [0.929, 1.000] |
+| Los cinco | - | 46/50 | [0.812, 0.968] |
+
+Cuatro semillas fallan solo la curtosis estricta: 1012 con 4.833, 1031 con
+4.759, 1035 con 4.564 y 1046 con 4.982.  Los otros cuatro hechos pasan en todas
+las semillas.  Los criterios estrictos no cambian la conclusión sobre la
+agrupación, pero hacen honesta la fila de curtosis.
+
+### Distribución nula con ruido gaussiano
+
+`docs/null_distribution.md` da los cuantiles 5%, 50% y 95% de cada estadística
+de precio sobre 1.000 series gaussianas independientes de 100.000 retornos,
+junto con el valor del modelo y su percentil en esa nula:
+
+```bash
+python scripts/run_null_distribution.py --config configs/baseline.json --series 1000 --n 100000
+```
+
+| Estadística | Gaussiana 5% | Mediana | 95% | Modelo | Percentil del modelo |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Curtosis | 2.975 | 3.001 | 3.028 | 5.488 | 100.0% |
+| ACF(retornos, 1) | -0.004923 | 0.000226 | 0.005366 | -0.004945 | 5.0% |
+| ACF(abs, 1) | -0.004767 | -0.0001644 | 0.005291 | 0.1443 | 100.0% |
+| ACF(abs, 50) | -0.005107 | -6.039e-06 | 0.005015 | 0.1176 | 100.0% |
+| Ratio de colas | 0.4736 | 0.9472 | 1.737 | 32.21 | 100.0% |
+
+El umbral de curtosis 3 es la mediana de la nula gaussiana, así que la mitad de
+las muestras gaussianas lo pasan.  El valor del modelo 5.488 queda muy por
+encima del cuantil 95%, 3.028.  El ratio de colas se comporta igual: cuantil
+95% 1.737 frente a 32.21 del modelo.  La autocorrelación de retornos es pequeña,
+cerca del cuantil 5% de la nula.  Las autocorrelaciones de valores absolutos
+quedan muy por encima del cuantil 95% gaussiano, y esa es la parte que un
+proceso gaussiano no reproduce.
 
 ### Precio y volumen
 
@@ -1114,14 +1215,14 @@ análisis de bloques en las 20 semillas de retención, lo que da 200 bloques:
 python scripts/run_block_ensemble.py --config configs/baseline.json --seeds 1001-1020 --blocks 10 --jobs 8
 ```
 
-| Estadística | Bloques que pasan | Tasa |
-| --- | ---: | ---: |
-| Curtosis | 200/200 | 100.0% |
-| ACF(retornos, lag 1) | 199/200 | 99.5% |
-| ACF(abs(retornos), lag 1) | 200/200 | 100.0% |
-| ACF(abs(retornos), lag 50) | 200/200 | 100.0% |
-| corr(volumen, abs(retornos)) | 200/200 | 100.0% |
-| P(abs(r) > 4 sd) / P_normal | 200/200 | 100.0% |
+| Estadística | Bloques que pasan | Tasa | IC 95% |
+| --- | ---: | ---: | ---: |
+| Curtosis | 200/200 | 100.0% | [98.1%, 100.0%] |
+| ACF(retornos, lag 1) | 199/200 | 99.5% | [97.2%, 99.9%] |
+| ACF(abs(retornos), lag 1) | 200/200 | 100.0% | [98.1%, 100.0%] |
+| ACF(abs(retornos), lag 50) | 200/200 | 100.0% | [98.1%, 100.0%] |
+| corr(volumen, abs(retornos)) | 200/200 | 100.0% | [98.1%, 100.0%] |
+| P(abs(r) > 4 sd) / P_normal | 200/200 | 100.0% | [98.1%, 100.0%] |
 
 Diecinueve de las 20 semillas pasan las seis estadísticas en los diez bloques.
 El único fallo es la semilla 1020, bloque 10, pasos 90.000 a 100.000.  Su
@@ -1204,11 +1305,13 @@ Las tres figuras están en `docs/`: serie de precios, histograma de retornos con
 la normal superpuesta en escala logarítmica y autocorrelación de retornos y de
 valores absolutos.  El mapa de parámetros está en `docs/phase_diagram.png`.
 
-La suite tiene 285 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
+La suite tiene 306 tests y 99% de cobertura de ramas.  Las mismas comprobaciones
 que CI se ejecutan con `ruff check .`, `ruff format --check .`, `mypy src`,
 `pytest --cov=market_sim --cov-fail-under=98`, `python scripts/check_docs.py`,
 `python scripts/check_versions.py`, `python scripts/check_results.py`,
 `python scripts/build_api_docs.py --check` y `python scripts/check_hashes.py`.
+Tras ejecutar el baseline, `python scripts/compare_baseline.py` comprueba que
+las métricas coinciden con `docs/baseline_metrics.json`.
 
 ### Licencia
 

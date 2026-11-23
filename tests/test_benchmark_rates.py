@@ -101,6 +101,8 @@ def test_format_and_csv(tmp_path) -> None:
     table = format_rates_markdown(rates)
     assert "| Series | Kurtosis |" in table
     assert "| first | 1/2 |" in table
+    assert "95% CI" in table
+    assert rate_metrics("x", "y", [PASSING], PARAMS).all_pass_interval[1] == pytest.approx(1.0)
     path = write_rates_csv(rates, tmp_path / "rates.csv")
     lines = path.read_text(encoding="utf-8").splitlines()
     assert len(lines) == 3

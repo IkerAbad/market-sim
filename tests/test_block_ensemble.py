@@ -82,7 +82,7 @@ def test_markdown_and_csv(tmp_path) -> None:
     results = run_block_ensemble(make_config(), [1, 2], n_blocks=5, jobs=1)
     markdown = format_block_ensemble_markdown(results, PARAMS)
     assert "| Seed | Blocks passing all six | All blocks |" in markdown
-    assert "| Statistic | Blocks passing | Rate |" in markdown
+    assert "| Statistic | Blocks passing | Rate | 95% CI |" in markdown
     path = write_block_ensemble_csv(results, PARAMS, tmp_path / "blocks.csv")
     with path.open("r", encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))

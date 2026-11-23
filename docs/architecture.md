@@ -28,6 +28,8 @@ market_sim.stylized  ->  compute_metrics  ->  evaluate_facts
         +--> scripts/run_extra_facts.py
         +--> scripts/run_benchmarks.py
         +--> scripts/run_benchmark_rates.py
+        +--> scripts/run_strict_criteria.py
+        +--> scripts/run_null_distribution.py
         +--> scripts/run_sample_size.py
         +--> scripts/run_price_volume.py
         +--> scripts/run_stability.py
@@ -51,6 +53,8 @@ market_sim.stylized  ->  compute_metrics  ->  evaluate_facts
 | `thresholds.py` | Threshold sensitivity over per-seed metrics |
 | `benchmarks.py` | Gaussian, Student-t and GARCH benchmarks |
 | `benchmark_rates.py` | Pass rates of the price facts over many series |
+| `strict.py` | Strict tail criteria on the per-seed hold-out |
+| `null_distribution.py` | Gaussian quantiles of the five price statistics |
 | `benchmark.py` | Wall-clock timing |
 | `real_data.py` | User-supplied return or price series |
 | `price_volume.py` | Price-gap and volume diagnostics |

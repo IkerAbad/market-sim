@@ -48,11 +48,13 @@ accounting.  See [the main results](../README.md#reading-the-table).
 
 The criterion is kurtosis above 3, and the sample kurtosis of Gaussian returns
 is noisy around 3.  In 100 Gaussian samples of 100,000 returns, 52 pass.  The
-tail-ratio criterion is similarly weak, with 47 of 100 Gaussian samples
-passing.  With kurtosis above 5 and tail ratio above 10 no Gaussian sample
-passes, the model passes 46 of 50 seeds and GARCH passes 5 of 100.  The main
-table keeps the original thresholds because they were fixed before the
-benchmark-rate runs.  See [the pass rates](benchmark_rates.md).
+Gaussian 95% quantile is 3.028, so the threshold is essentially the median of
+the null.  The tail-ratio criterion is similarly weak, with 47 of 100 Gaussian
+samples passing.  With kurtosis above 5 and tail ratio above 10 no Gaussian
+sample passes, the model passes 46 of 50 seeds and GARCH passes 5 of 100.  The
+main table keeps the original thresholds because they were fixed before the
+benchmark-rate runs.  See [the pass rates](benchmark_rates.md) and
+[the null distribution](null_distribution.md).
 
 ## What does "seed hold-out" mean?
 

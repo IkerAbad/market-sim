@@ -6,6 +6,23 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-23
+
+### Added
+
+- Strict criteria on the 50-seed hold-out in `docs/strict_criteria.md`, with
+  Wilson intervals and the four seeds that fail the strict kurtosis threshold.
+- Gaussian null distribution in `docs/null_distribution.md`, with the 5%, 50%
+  and 95% quantiles of the five price statistics and the model percentile.
+- Wilson intervals for the all-five benchmark pass rate and for the cross-seed
+  block pass rates.
+- Pinned reference CI job regenerates the baseline and compares it with
+  `docs/baseline_metrics.json` at a relative tolerance of 1e-9.
+
+### Changed
+
+- The suite has 306 tests and 99% branch coverage.
+
 ## [0.6.1] - 2026-11-23
 
 ### Fixed

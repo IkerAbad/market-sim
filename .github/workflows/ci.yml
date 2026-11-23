@@ -73,6 +73,10 @@ jobs:
           python -m pip install -c constraints-reference.txt -e ".[dev]"
       - name: Test
         run: python -m pytest --cov=market_sim --cov-fail-under=98
+      - name: Baseline reproduction
+        run: |
+          python scripts/run_simulation.py --config configs/baseline.json --output /tmp/reference_results
+          python scripts/compare_baseline.py --results /tmp/reference_results --expected docs/baseline_metrics.json
 
   build:
     name: build and install wheel
@@ -150,3 +154,13 @@ jobs:
           python scripts/run_benchmark_rates.py --series 10 --n 20000 --report /tmp/benchmark_rates.md --csv /tmp/benchmark_rates.csv
           test -s /tmp/benchmark_rates.md
           test -s /tmp/benchmark_rates.csv
+      - name: Strict criteria
+        run: |
+          python scripts/run_strict_criteria.py --input docs/robustness_50.csv --report /tmp/strict_criteria.md --csv /tmp/strict_criteria.csv
+          test -s /tmp/strict_criteria.md
+          test -s /tmp/strict_criteria.csv
+      - name: Gaussian null distribution
+        run: |
+          python scripts/run_null_distribution.py --series 100 --n 20000 --report /tmp/null_distribution.md --csv /tmp/null_distribution.csv
+          test -s /tmp/null_distribution.md
+          test -s /tmp/null_distribution.csv

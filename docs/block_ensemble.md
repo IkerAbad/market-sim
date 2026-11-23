@@ -34,14 +34,14 @@ python scripts/run_block_ensemble.py --config configs/baseline.json --seeds 1001
 | 1019 | 10/10 | yes |
 | 1020 | 9/10 | no |
 
-| Statistic | Blocks passing | Rate |
-| --- | ---: | ---: |
-| Kurtosis | 200/200 | 100.0% |
-| ACF(returns, lag 1) | 199/200 | 99.5% |
-| ACF(abs(returns), lag 1) | 200/200 | 100.0% |
-| ACF(abs(returns), lag 50) | 200/200 | 100.0% |
-| corr(volume, abs(returns)) | 200/200 | 100.0% |
-| P(abs(r) > 4 sd) / P_normal | 200/200 | 100.0% |
+| Statistic | Blocks passing | Rate | 95% CI |
+| --- | ---: | ---: | ---: |
+| Kurtosis | 200/200 | 100.0% | [98.1%, 100.0%] |
+| ACF(returns, lag 1) | 199/200 | 99.5% | [97.2%, 99.9%] |
+| ACF(abs(returns), lag 1) | 200/200 | 100.0% | [98.1%, 100.0%] |
+| ACF(abs(returns), lag 50) | 200/200 | 100.0% | [98.1%, 100.0%] |
+| corr(volume, abs(returns)) | 200/200 | 100.0% | [98.1%, 100.0%] |
+| P(abs(r) > 4 sd) / P_normal | 200/200 | 100.0% | [98.1%, 100.0%] |
 
 ## Reading
 

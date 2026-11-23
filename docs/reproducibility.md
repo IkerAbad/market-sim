@@ -49,6 +49,8 @@ python scripts/run_thresholds.py --input docs/robustness.csv --report docs/thres
 python scripts/run_extra_facts.py --results results --report docs/additional_facts.md
 python scripts/run_benchmarks.py --config configs/baseline.json --results results --report docs/benchmarks.md
 python scripts/run_benchmark_rates.py --config configs/baseline.json --series 100 --n 100000
+python scripts/run_strict_criteria.py --config configs/baseline.json --input docs/robustness_50.csv
+python scripts/run_null_distribution.py --config configs/baseline.json --series 1000 --n 100000
 python scripts/run_benchmark.py --config configs/baseline.json --steps 10000,50000,100000
 python scripts/run_sample_size.py --config configs/baseline.json --sizes 10000,50000,100000,200000 --seeds 1001-1003 --jobs 8
 python scripts/run_price_volume.py --config configs/baseline.json --results results --report docs/price_volume.md
@@ -94,7 +96,9 @@ python -m twine check dist/*
 
 The CI workflow runs the same gates.  It also runs the full 101,000-step
 baseline, builds the three figures, runs a 3-seed ensemble smoke test and
-installs the built wheel in a clean environment.
+installs the built wheel in a clean environment.  The pinned reference job
+regenerates the baseline and compares every metric with
+`docs/baseline_metrics.json` at a relative tolerance of 1e-9.
 
 ## Committed outputs
 
@@ -114,6 +118,8 @@ installs the built wheel in a clean environment.
 | `docs/thresholds.csv` | `18F8BF5F55FBBF68D5605D04AA1D6AB25DBD30FFA0E60FB6A5EDC7D831E80153` |
 | `docs/benchmarks.csv` | `4DD42A024FF55C7E24FCEFF9C8F994E6CEC622A4AE1D69C5AB1EE07FE0FA3E3B` |
 | `docs/benchmark_rates.csv` | `DEE83E03513203F07962B1A9853508DC4A23CCD6B390374D8CF91211D10EFE80` |
+| `docs/strict_criteria.csv` | `121C1A44ECF4AE6732FA939A447E4B925D07DF9D3B018D49B0093AA0C8D95FF0` |
+| `docs/null_distribution.csv` | `723603B4A00EDC635593C82F3D7B2E3628C02EB411EB1C3574873E7710FA5C09` |
 | `docs/performance.csv` | `A1B4533529576001C410697F8ED15A5C37942C493E97603F3E44A58878265591` |
 | `docs/sample_size.csv` | `F319DDDAB1ADC1B5E85359960C29B88D65FE2FDEE51877DC8EDE11669EDE57B8` |
 | `docs/price_volume.csv` | `6948769BC613DEC23C717ED13BD6758376FD1D362848649F7DB374AF3FFB7602` |

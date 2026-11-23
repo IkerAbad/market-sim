@@ -14,12 +14,12 @@ python scripts/run_benchmark_rates.py --config configs/baseline.json --series 10
 
 ## Original criteria
 
-| Series | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | Tail ratio | All five |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| market-sim baseline | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 |
-| Gaussian | 52/100 | 100/100 | 0/100 | 0/100 | 47/100 | 0/100 |
-| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 |
-| GARCH(1,1) | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 |
+| Series | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | Tail ratio | All five | 95% CI |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| market-sim baseline | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 | 50/50 | [0.93, 1.00] |
+| Gaussian | 52/100 | 100/100 | 0/100 | 0/100 | 47/100 | 0/100 | [0.00, 0.04] |
+| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 | [0.00, 0.04] |
+| GARCH(1,1) | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 | 100/100 | [0.96, 1.00] |
 
 ## Stricter criteria
 
@@ -27,12 +27,12 @@ Kurtosis above 5 and tail ratio above 10.  The other three criteria are
 unchanged.  This table shows how the pass rates move when the two weak
 tail criteria are tightened.
 
-| Series | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | Tail ratio | All five |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| market-sim baseline | 46/50 | 50/50 | 50/50 | 50/50 | 50/50 | 46/50 |
-| Gaussian | 0/100 | 100/100 | 0/100 | 0/100 | 0/100 | 0/100 |
-| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 |
-| GARCH(1,1) | 5/100 | 100/100 | 100/100 | 100/100 | 100/100 | 5/100 |
+| Series | Kurtosis | ACF(returns, 1) | ACF(abs, 1) | ACF(abs, 50) | Tail ratio | All five | 95% CI |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| market-sim baseline | 46/50 | 50/50 | 50/50 | 50/50 | 50/50 | 46/50 | [0.81, 0.97] |
+| Gaussian | 0/100 | 100/100 | 0/100 | 0/100 | 0/100 | 0/100 | [0.00, 0.04] |
+| Student-t(5) | 100/100 | 100/100 | 0/100 | 0/100 | 100/100 | 0/100 | [0.00, 0.04] |
+| GARCH(1,1) | 5/100 | 100/100 | 100/100 | 100/100 | 100/100 | 5/100 | [0.02, 0.11] |
 
 ## Reading
 

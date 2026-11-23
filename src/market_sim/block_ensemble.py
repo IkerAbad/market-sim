@@ -15,6 +15,7 @@ from functools import partial
 from pathlib import Path
 
 from .config import MetricsParams, SimulationConfig
+from .ensemble import wilson_interval
 from .market import simulate
 from .stability import (
     METRIC_KEYS,
@@ -143,12 +144,14 @@ def format_block_ensemble_markdown(
             f"{'yes' if passing == len(counts) else 'no'} |"
         )
     statistic_lines = [
-        "| Statistic | Blocks passing | Rate |",
-        "| --- | ---: | ---: |",
+        "| Statistic | Blocks passing | Rate | 95% CI |",
+        "| --- | ---: | ---: | ---: |",
     ]
     for item in summary.statistics:
+        lower, upper = wilson_interval(item.passes, item.total)
         statistic_lines.append(
-            f"| {item.label} | {item.passes}/{item.total} | {100.0 * item.rate:.1f}% |"
+            f"| {item.label} | {item.passes}/{item.total} | {100.0 * item.rate:.1f}% | "
+            f"[{100.0 * lower:.1f}%, {100.0 * upper:.1f}%] |"
         )
     return "\n".join([*seed_lines, "", *statistic_lines])
 

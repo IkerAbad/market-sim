@@ -23,6 +23,8 @@ def test_full_commands_cover_the_scripts() -> None:
         "run_extra_facts.py",
         "run_benchmarks.py",
         "run_benchmark_rates.py",
+        "run_strict_criteria.py",
+        "run_null_distribution.py",
         "run_benchmark.py",
         "run_sample_size.py",
         "run_price_volume.py",

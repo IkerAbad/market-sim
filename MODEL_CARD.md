@@ -7,7 +7,7 @@ study whether a small set of behavioural rules can generate five stylized facts
 of return series.  The model is not estimated from market data and is not a
 forecasting system.
 
-- Version: 0.6.1
+- Version: 0.7.0
 - License: MIT
 - Author: Iker Abad
 - Repository: https://github.com/IkerAbad/market-sim
@@ -80,7 +80,12 @@ A GARCH(1,1) benchmark also passes the five price facts at the original
 thresholds.  `docs/benchmark_rates.md` repeats the benchmarks over 100 series
 and shows that the original kurtosis and tail-ratio criteria are weak.  With
 kurtosis above 5 and tail ratio above 10 the model passes all five in 46 of 50
-seeds and GARCH in 5 of 100.
+seeds and GARCH in 5 of 100.  `docs/strict_criteria.md` applies those strict
+thresholds to the hold-out and lists the four seeds that fail only kurtosis.
+`docs/null_distribution.md` gives the Gaussian quantiles: the threshold of 3 is
+the median of the null and the model value 5.488 is above the 95% quantile of
+3.028.  The absolute-return autocorrelations are far above the Gaussian 95%
+quantile.
 
 Five additional diagnostics are in `docs/additional_facts.md`.  The model
 reproduces the long-memory DFA exponent and aggregational Gaussianity but not
