@@ -905,6 +905,8 @@ reproduction job.  The workflow file is `.github/workflows/ci.yml`.
 - pinned reference environment in `constraints-reference.txt`
 - container smoke test in CI
 - release workflow on `v*` tags
+- bit-for-bit result hash comparison on Ubuntu and Windows
+- PyPI trusted publishing and GHCR container publishing on tags
 
 These gates run on every push and pull request.  The local commands are in
 `CONTRIBUTING.md`.
@@ -914,7 +916,8 @@ These gates run on every push and pull request.  The local commands are in
 On the reference machine (Ryzen 9 5900X, 32 GB DDR4-3600, Windows 11), the
 simulation loop takes 5.538 s for 100,000 steps and 200 agents.  That is about
 18,058 steps/s or 3.61 million agent-steps/s.  `docs/performance.md` has the
-full table.  The command is:
+full table.  Timing depends on the machine and is not part of the
+byte-identical output table.  The command is:
 
 ```bash
 python scripts/run_benchmark.py --config configs/baseline.json --steps 10000,50000,100000

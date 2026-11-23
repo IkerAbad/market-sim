@@ -57,6 +57,17 @@ def test_unlisted_file_is_reported(tmp_path) -> None:
     assert any("no hash row" in error for error in errors)
 
 
+def test_environment_dependent_file_is_not_required(tmp_path) -> None:
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "a.csv").write_text("x\n", encoding="utf-8")
+    (tmp_path / "docs" / "performance.csv").write_text("time\n", encoding="utf-8")
+    (tmp_path / "docs" / "reproducibility.md").write_text(
+        "| `docs/a.csv` | `" + "A" * 64 + "` |\n", encoding="utf-8"
+    )
+    errors = check_hashes(tmp_path)
+    assert not any("performance.csv" in error for error in errors)
+
+
 def test_empty_table_is_reported(tmp_path) -> None:
     (tmp_path / "docs").mkdir()
     (tmp_path / "docs" / "reproducibility.md").write_text("# Empty\n", encoding="utf-8")

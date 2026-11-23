@@ -13,6 +13,9 @@ ROW_PATTERN = re.compile(
 
 TEXT_SUFFIXES = {".csv", ".json", ".md", ".txt"}
 
+# Timing depends on the machine and cannot be byte-identical across runs.
+ENVIRONMENT_DEPENDENT = {"docs/performance.csv"}
+
 
 def parse_hash_table(text: str) -> list[tuple[str, str]]:
     """Return ``(path, sha256)`` pairs from the Markdown hash table."""
@@ -42,6 +45,8 @@ def check_hashes(root: Path) -> list[str]:
     for path in sorted((root / "docs").iterdir()):
         if path.suffix in {".csv", ".json", ".png"}:
             relative = path.relative_to(root).as_posix()
+            if relative in ENVIRONMENT_DEPENDENT:
+                continue
             if relative not in listed:
                 errors.append(f"{relative}: file has no hash row")
     for relative, expected in entries:

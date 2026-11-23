@@ -150,7 +150,6 @@ compares the regenerated files with the committed table.
 | `docs/discrimination_grid.csv` | `97263D626518BCF5DB070F2C5E62474977DFBE16B55D54ECE51C70FFA8D4C4DC` |
 | `docs/additional_discrimination.csv` | `0E1594A759DA8577EFD79CD0F002321BFF3F73693BF56812964AFD2E54DACFB7` |
 | `docs/discrimination.png` | `AB7B2496825C1DC47EBC9A0DEE56330729BCF5E602879D6F7349870F47848015` |
-| `docs/performance.csv` | `A1B4533529576001C410697F8ED15A5C37942C493E97603F3E44A58878265591` |
 | `docs/sample_size.csv` | `F319DDDAB1ADC1B5E85359960C29B88D65FE2FDEE51877DC8EDE11669EDE57B8` |
 | `docs/price_volume.csv` | `6948769BC613DEC23C717ED13BD6758376FD1D362848649F7DB374AF3FFB7602` |
 | `docs/stability.csv` | `63766A0C0219BAB3BAB9E378480169C915D732581F2DE2CEFBADDDEC57245FF3` |
@@ -159,4 +158,6 @@ compares the regenerated files with the committed table.
 The three baseline figures are byte-identical when regenerated in the reference
 environment.  The hash table is a check, not a substitute for the commands.
 `scripts/check_hashes.py` also fails when a CSV, JSON or PNG file under `docs/`
-has no row in the table.
+has no row in the table.  `docs/performance.csv` is excluded because timing
+depends on the machine.  The command and the reference machine are in
+`docs/performance.md`.

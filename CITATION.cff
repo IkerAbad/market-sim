@@ -3,7 +3,7 @@ message: "If you use this software, cite it as below."
 type: software
 title: "market-sim: an agent-based toy market for stylized facts"
 version: 1.0.0
-date-released: 2026-11-22
+date-released: 2026-11-23
 authors:
   - family-names: Abad
     given-names: Iker
