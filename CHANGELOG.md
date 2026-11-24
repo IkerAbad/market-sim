@@ -6,6 +6,14 @@ The format follows Keep a Changelog and the project uses semantic versioning.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-24
+
+### Changed
+
+- Distribution name changed to `abm-market`. PyPI rejected `market-sim` as too
+  similar to an existing project. The command is still `market-sim` and the
+  import package is still `market_sim`.
+
 ## [1.0.0] - 2026-11-23
 
 ### Added

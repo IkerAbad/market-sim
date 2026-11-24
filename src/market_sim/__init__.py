@@ -166,7 +166,7 @@ from .thresholds import (
 )
 from .version_check import check_versions
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 __all__ = [
     "ABLATIONS",

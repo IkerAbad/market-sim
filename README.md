@@ -1,6 +1,6 @@
 # market-sim
 
-[![PyPI](https://img.shields.io/pypi/v/market-sim.svg)](https://pypi.org/project/market-sim/)
+[![PyPI](https://img.shields.io/pypi/v/abm-market.svg)](https://pypi.org/project/abm-market/)
 
 A reproducible agent-based toy market with fundamentalists, chartists and noise
 traders.  The repository measures five stylized facts of financial returns with
@@ -18,8 +18,12 @@ autocorrelation.  See `docs/ablations.md`.
 ## Install
 
 ```bash
-pip install market-sim==1.0.0
+pip install abm-market==1.0.1
 ```
+
+The distribution is `abm-market` because PyPI rejected `market-sim` as too
+similar to an existing project. The command is still `market-sim` and the
+import package is still `market_sim`.
 
 The baseline configuration is packaged with the distribution, so the published
 result does not need the repository:
@@ -985,11 +989,15 @@ Contributor setup is in `CONTRIBUTING.md`.
 
 ## Español
 
-[![PyPI](https://img.shields.io/pypi/v/market-sim.svg)](https://pypi.org/project/market-sim/)
+[![PyPI](https://img.shields.io/pypi/v/abm-market.svg)](https://pypi.org/project/abm-market/)
 
 ```bash
-pip install market-sim==1.0.0
+pip install abm-market==1.0.1
 ```
+
+La distribución se llama `abm-market` porque PyPI rechazó `market-sim` por
+parecerse a un proyecto existente. El comando sigue siendo `market-sim` y el
+paquete que se importa sigue siendo `market_sim`.
 
 La configuración base viaja dentro del paquete.  No hace falta el repositorio
 para reproducir la tabla publicada:
